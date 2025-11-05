@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, Download, FileText, Shield, Zap, Award } from "lucide-react";
+import { ChevronRight, Download, FileText, Shield, Zap, Award, MessageCircle, Mail } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SideNav from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -38,16 +39,17 @@ const ProdutoDetalhe = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <SideNav />
 
-      {/* Breadcrumb */}
-      <section className="border-b border-steel/20 bg-steel/5 py-4">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">Home</Link>
-            <ChevronRight className="h-4 w-4" />
-            <Link to="/produtos" className="hover:text-foreground">Produtos</Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">Carroceria Baú em Alumínio</span>
+      <main className="pb-20 lg:ml-24">
+      <section className="border-b border-steel/20 bg-navy/50 py-4">
+        <div className="container mx-auto px-4 lg:px-8">
+          <nav className="flex items-center gap-2 text-sm text-white/70">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <span>/</span>
+            <Link to="/produtos" className="hover:text-white transition-colors">Produtos</Link>
+            <span>/</span>
+            <span className="text-white">Carroceria Baú em Alumínio</span>
           </nav>
         </div>
       </section>
@@ -287,6 +289,26 @@ const ProdutoDetalhe = () => {
           </div>
         </div>
       </section>
+
+      {/* CTA Sticky Mobile */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-steel/20 bg-white/95 p-4 backdrop-blur-sm lg:hidden">
+        <div className="flex gap-2">
+          <Button 
+            className="btn-hero flex-1 gap-2"
+            onClick={() => window.open('https://wa.me/5511999999999?text=Olá! Gostaria de um orçamento.', '_blank')}
+          >
+            <MessageCircle className="h-5 w-5" />
+            WhatsApp
+          </Button>
+          <Link to="/contato" className="flex-1">
+            <Button variant="outline" className="w-full gap-2 border-rodotec-blue text-rodotec-blue">
+              <Mail className="h-5 w-5" />
+              Orçamento
+            </Button>
+          </Link>
+        </div>
+      </div>
+      </main>
 
       <Footer />
     </div>

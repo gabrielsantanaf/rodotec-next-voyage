@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,7 @@ const ProductCard = ({ title, image, features, badge, link }: ProductCardProps) 
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {badge && (
-          <Badge className="absolute right-4 top-4 bg-tech-gold text-navy">
+          <Badge className="absolute right-4 top-4 bg-rodotec-blue text-white">
             {badge}
           </Badge>
         )}
@@ -31,18 +31,18 @@ const ProductCard = ({ title, image, features, badge, link }: ProductCardProps) 
         <h3 className="mb-4 font-heading text-xl font-bold text-foreground">
           {title}
         </h3>
+        {/* Technical Bullets - Real Value */}
         <ul className="mb-6 space-y-2">
           {features.map((feature, index) => (
-            <li key={index} className="flex items-start text-sm text-muted-foreground">
-              <span className="mr-2 mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rodotec-blue" />
-              {feature}
+            <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-rodotec-blue mt-0.5" />
+              <span>{feature}</span>
             </li>
           ))}
         </ul>
         <Link to={link}>
-          <Button variant="ghost" className="group/btn w-full justify-between text-rodotec-blue hover:bg-rodotec-blue/10">
-            Ver detalhes
-            <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+          <Button variant="outline" className="w-full border-rodotec-blue/20 text-rodotec-blue hover:bg-rodotec-blue hover:text-white">
+            Ver Detalhes
           </Button>
         </Link>
       </CardContent>

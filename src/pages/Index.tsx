@@ -75,36 +75,34 @@ const Index = () => {
       <Header />
       <SideNav />
 
-      {/* Hero Section with 42° Diagonal */}
+      {/* Hero Cinematográfico - 42° Diagonal Autoral */}
       <section className="relative h-[600px] overflow-hidden md:h-[700px] lg:ml-24">
         <div className="absolute inset-0">
           <img
             src={heroImage}
-            alt="Caminhão RODOTEC ao entardecer"
+            alt="Implementos RODOTEC em alta performance"
             className="h-full w-full object-cover"
           />
-          {/* 42° diagonal mask - autoral */}
+          {/* Diagonal mask 42° com gradiente autoral */}
           <div 
-            className="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/75 to-transparent"
-            style={{
-              clipPath: "polygon(0 0, 100% 0, 85% 100%, 0 100%)"
-            }}
+            className="diagonal-mask-42 absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/70 to-transparent"
           />
         </div>
         
         <div className="relative container mx-auto flex h-full items-center px-4 lg:px-8">
           <div className="max-w-2xl animate-fade-in space-y-6">
+            {/* H1 sólido - SEM gradiente */}
             <h1 className="font-heading text-5xl font-bold leading-tight text-white md:text-6xl lg:text-7xl">
               Engenharia que move resultados
             </h1>
             <p className="text-xl text-white/90 md:text-2xl">
-              Carrocerias e implementos com menor tara, estanqueidade e maior vida útil.
+              Carrocerias e implementos com menor tara, estanqueidade e maior vida útil
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link to="/produtos">
-                <button className="btn-hero">
+                <button className="btn-hero flex items-center gap-2">
                   Ver Produtos
-                  <ArrowRight className="ml-2 inline h-5 w-5" />
+                  <ArrowRight className="h-5 w-5" />
                 </button>
               </Link>
               <Link to="/contato">
@@ -116,14 +114,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Chevron Pattern Overlay - 42° angle */}
-        <div 
-          className="absolute bottom-0 right-0 h-32 w-full opacity-20"
-          style={{
-            background: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40 L40 0 L40 20 L20 40 Z' fill='%231565F5' fill-opacity='0.15' transform='rotate(42 40 40)'/%3E%3C/svg%3E")`,
-            backgroundRepeat: "repeat"
-          }}
-        />
+        {/* Chevron Pattern Overlay - 42° autoral */}
+        <div className="chevron-pattern absolute bottom-0 right-0 h-32 w-full opacity-20" />
       </section>
 
       {/* Products Section */}

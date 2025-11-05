@@ -1,19 +1,42 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Truck, Box, Container, Wrench, Layers, MapPin } from "lucide-react";
+import { Truck, Box, Container, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SideNav = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const location = useLocation();
 
+  // APENAS produtos - navegação funcional
   const navItems = [
-    { id: "carrocerias", label: "Carrocerias", icon: Truck, path: "/produtos", color: "rodotec-blue" },
-    { id: "sobre-chassi", label: "Sobre-Chassi", icon: Box, path: "/produtos", color: "rodotec-blue" },
-    { id: "reboques", label: "Reboques", icon: Container, path: "/produtos", color: "rodotec-blue" },
-    { id: "pecas", label: "Peças & Reposição", icon: Wrench, path: "/produtos", color: "rodotec-blue" },
-    { id: "tecnologia", label: "Tecnologia", icon: Layers, path: "/tecnologia", color: "rodotec-blue" },
-    { id: "distribuidores", label: "Distribuidores", icon: MapPin, path: "/distribuidores", color: "tech-gold" },
+    { 
+      id: "carrocerias", 
+      label: "Carrocerias", 
+      icon: Truck, 
+      path: "/produtos",
+      thumb: "/placeholder.svg"
+    },
+    { 
+      id: "sobre-chassi", 
+      label: "Sobre-Chassi", 
+      icon: Box, 
+      path: "/produtos",
+      thumb: "/placeholder.svg"
+    },
+    { 
+      id: "reboques", 
+      label: "Reboques", 
+      icon: Container, 
+      path: "/produtos",
+      thumb: "/placeholder.svg"
+    },
+    { 
+      id: "pecas", 
+      label: "Peças & Reposição", 
+      icon: Wrench, 
+      path: "/produtos",
+      thumb: "/placeholder.svg"
+    }
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -21,7 +44,7 @@ const SideNav = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-20 z-40 hidden h-[calc(100vh-5rem)] bg-steel/95 backdrop-blur-sm transition-all duration-300 lg:block",
+        "fixed left-0 top-16 z-40 hidden h-[calc(100vh-4rem)] bg-steel/95 backdrop-blur-sm transition-all duration-300 lg:block",
         isExpanded ? "w-80" : "w-24"
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -39,19 +62,24 @@ const SideNav = () => {
               className={cn(
                 "group flex items-center gap-4 rounded-xl p-4 transition-all duration-200",
                 active
-                  ? `bg-${item.color} text-white shadow-[0_0_32px_hsl(var(--${item.color})/0.3)]`
-                  : "text-white/70 hover:bg-white/5 hover:text-white"
+                  ? "bg-rodotec-blue text-white shadow-glow"
+                  : "text-white/70 hover:bg-white/5 hover:text-white focus:animate-pulse focus:outline-none focus:ring-2 focus:ring-rodotec-blue"
               )}
             >
               <Icon className={cn("h-6 w-6 shrink-0", active && "animate-pulse")} />
-              <span
-                className={cn(
-                  "whitespace-nowrap font-medium transition-all duration-300",
-                  isExpanded ? "opacity-100" : "opacity-0 w-0"
-                )}
-              >
-                {item.label}
-              </span>
+              
+              {isExpanded && (
+                <div className="flex flex-1 items-center gap-3 overflow-hidden">
+                  <span className="whitespace-nowrap font-medium">
+                    {item.label}
+                  </span>
+                  <img 
+                    src={item.thumb} 
+                    alt={item.label}
+                    className="ml-auto h-12 w-16 rounded object-cover opacity-60"
+                  />
+                </div>
+              )}
             </Link>
           );
         })}

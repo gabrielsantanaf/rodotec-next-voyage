@@ -58,9 +58,11 @@ const Header = () => {
             <Globe className="h-5 w-5" />
           </Button>
 
-          <Button className="hidden btn-hero sm:flex">
-            Pedir Orçamento
-          </Button>
+          <Link to="/contato" className="hidden sm:block">
+            <Button className="btn-hero">
+              Pedir Orçamento
+            </Button>
+          </Link>
 
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -81,9 +83,11 @@ const Header = () => {
                     {item.name}
                   </Link>
                 ))}
-                <Button className="btn-hero mt-6">
-                  Pedir Orçamento
-                </Button>
+                <Link to="/contato" className="block">
+                  <Button className="btn-hero mt-6 w-full">
+                    Pedir Orçamento
+                  </Button>
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>

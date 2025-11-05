@@ -54,6 +54,7 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
+        body: ["Inter", "system-ui", "sans-serif"],
         heading: ["Manrope", "Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {

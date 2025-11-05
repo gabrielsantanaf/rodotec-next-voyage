@@ -96,14 +96,20 @@ const Produtos = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
-      <section className="bg-navy py-16">
+      {/* Breadcrumb */}
+      <div className="border-b border-steel/20 bg-navy/50 py-4">
         <div className="container mx-auto px-4">
-          <nav className="mb-6 flex items-center space-x-2 text-sm text-white/60">
-            <Link to="/" className="hover:text-white">Home</Link>
+          <nav className="flex items-center gap-2 text-sm text-white/70">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-white">Produtos</span>
           </nav>
+        </div>
+      </div>
+
+      {/* Hero */}
+      <section className="bg-navy py-16">
+        <div className="container mx-auto px-4">
           <h1 className="font-heading text-4xl font-bold text-white md:text-5xl">
             Nossos Produtos
           </h1>
