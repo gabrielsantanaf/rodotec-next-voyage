@@ -14,7 +14,9 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProdutos from "./pages/admin/AdminProdutos";
+import AdminProdutoEditor from "./pages/admin/AdminProdutoEditor";
 import AdminOrcamentos from "./pages/admin/AdminOrcamentos";
+import AdminOrcamentoDetalhe from "./pages/admin/AdminOrcamentoDetalhe";
 
 const queryClient = new QueryClient();
 
@@ -56,10 +58,34 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/produtos/novo"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminProdutoEditor />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/produtos/:id"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminProdutoEditor />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
               path="/admin/orcamentos"
               element={
                 <ProtectedAdminRoute>
                   <AdminOrcamentos />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/orcamentos/:id"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminOrcamentoDetalhe />
                 </ProtectedAdminRoute>
               }
             />

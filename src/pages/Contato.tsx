@@ -9,25 +9,69 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Contato = () => {
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    productName: 'Outro',
+    message: '',
+    consentLGPD: false,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Mensagem enviada!",
-      description: "Retornaremos em breve. Obrigado pelo contato.",
-    });
-    
-    setIsSubmitting(false);
+
+    try {
+      const { error } = await supabase
+        .from('quote_requests')
+        .insert([
+          {
+            name: formData.name,
+            company: formData.company || null,
+            email: formData.email,
+            phone: formData.phone,
+            product_name: formData.productName,
+            message: formData.message,
+            consent_lgpd: formData.consentLGPD,
+            status: 'NEW',
+            source: 'SITE_FORM',
+          },
+        ]);
+
+      if (error) throw error;
+
+      toast.success("Solicitação enviada com sucesso!", {
+        description: "Retornaremos em breve. Obrigado pelo contato.",
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        productName: 'Outro',
+        message: '',
+        consentLGPD: false,
+      });
+
+      // Reset form element
+      (e.target as HTMLFormElement).reset();
+    } catch (error: any) {
+      console.error('Error submitting quote request:', error);
+      toast.error("Erro ao enviar solicitação", {
+        description: "Por favor, tente novamente mais tarde.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -121,6 +165,8 @@ const Contato = () => {
                           id="name"
                           placeholder="Seu nome"
                           required
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           className="border-steel/20"
                         />
                       </div>
@@ -130,6 +176,8 @@ const Contato = () => {
                         <Input
                           id="company"
                           placeholder="Nome da empresa"
+                          value={formData.company}
+                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                           className="border-steel/20"
                         />
                       </div>
@@ -143,6 +191,8 @@ const Contato = () => {
                           type="email"
                           placeholder="seu@email.com"
                           required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           className="border-steel/20"
                         />
                       </div>
@@ -154,6 +204,8 @@ const Contato = () => {
                           type="tel"
                           placeholder="(00) 00000-0000"
                           required
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           className="border-steel/20"
                         />
                       </div>
@@ -161,17 +213,17 @@ const Contato = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="product">Produto de Interesse</Label>
-                      <Select>
+                      <Select value={formData.productName} onValueChange={(value) => setFormData({ ...formData, productName: value })}>
                         <SelectTrigger className="border-steel/20">
                           <SelectValue placeholder="Selecione um produto" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="carroceria-bau">Carroceria Baú</SelectItem>
-                          <SelectItem value="reboque-frigorifico">Reboque Frigorífico</SelectItem>
-                          <SelectItem value="carroceria-graneleira">Carroceria Graneleira</SelectItem>
-                          <SelectItem value="sider">Carroceria Sider</SelectItem>
-                          <SelectItem value="especial">Implemento Especial</SelectItem>
-                          <SelectItem value="outro">Outro</SelectItem>
+                          <SelectItem value="Carroceria Baú">Carroceria Baú</SelectItem>
+                          <SelectItem value="Reboque Frigorífico">Reboque Frigorífico</SelectItem>
+                          <SelectItem value="Carroceria Graneleira">Carroceria Graneleira</SelectItem>
+                          <SelectItem value="Carroceria Sider">Carroceria Sider</SelectItem>
+                          <SelectItem value="Implemento Especial">Implemento Especial</SelectItem>
+                          <SelectItem value="Outro">Outro</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -183,6 +235,8 @@ const Contato = () => {
                         placeholder="Descreva suas necessidades e dúvidas..."
                         rows={6}
                         required
+                        value={formData.message}
+                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         className="border-steel/20 resize-none"
                       />
                     </div>
@@ -192,6 +246,8 @@ const Contato = () => {
                         type="checkbox"
                         id="terms"
                         required
+                        checked={formData.consentLGPD}
+                        onChange={(e) => setFormData({ ...formData, consentLGPD: e.target.checked })}
                         className="mt-1 h-4 w-4 rounded border-steel/20"
                       />
                       <Label htmlFor="terms" className="text-sm text-muted-foreground">

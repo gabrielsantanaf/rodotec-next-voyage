@@ -10,6 +10,11 @@ import {
   Settings,
   LogOut,
   Search,
+  FolderOpen,
+  Warehouse,
+  TrendingUp,
+  FileEdit,
+  Globe,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,7 +31,12 @@ const sidebarItems = [
   { icon: Home, label: 'Início', path: '/admin' },
   { icon: FileText, label: 'Orçamentos', path: '/admin/orcamentos' },
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
+  { icon: FolderOpen, label: 'Coleções', path: '/admin/colecoes' },
+  { icon: Warehouse, label: 'Estoque', path: '/admin/estoque' },
   { icon: Users, label: 'Clientes', path: '/admin/clientes' },
+  { icon: TrendingUp, label: 'Marketing', path: '/admin/marketing' },
+  { icon: FileEdit, label: 'Conteúdo', path: '/admin/conteudo' },
+  { icon: Globe, label: 'Markets', path: '/admin/markets' },
   { icon: BarChart3, label: 'Análises', path: '/admin/analises' },
   { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
 ];

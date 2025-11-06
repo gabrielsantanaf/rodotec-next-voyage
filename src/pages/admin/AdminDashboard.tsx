@@ -1,8 +1,27 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Package, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { FileText, Package, TrendingUp, CheckCircle2, ExternalLink } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+type QuoteRequest = {
+  id: string;
+  name: string;
+  company: string | null;
+  status: string;
+  created_at: string;
+};
+
+type Product = {
+  id: string;
+  title: string;
+  status: string;
+  updated_at: string;
+};
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -12,15 +31,20 @@ export default function AdminDashboard() {
     activeProducts: 0,
     draftProducts: 0,
   });
+  const [recentQuotes, setRecentQuotes] = useState<QuoteRequest[]>([]);
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadStats();
+    loadDashboardData();
   }, []);
 
-  const loadStats = async () => {
-    const [quotesResult, productsResult] = await Promise.all([
+  const loadDashboardData = async () => {
+    const [quotesResult, productsResult, recentQuotesResult, recentProductsResult] = await Promise.all([
       supabase.from('quote_requests').select('status'),
       supabase.from('products').select('status'),
+      supabase.from('quote_requests').select('id, name, company, status, created_at').order('created_at', { ascending: false }).limit(5),
+      supabase.from('products').select('id, title, status, updated_at').order('updated_at', { ascending: false }).limit(5),
     ]);
 
     if (quotesResult.data) {
@@ -48,6 +72,38 @@ export default function AdminDashboard() {
         draftProducts: draft,
       }));
     }
+
+    if (recentQuotesResult.data) {
+      setRecentQuotes(recentQuotesResult.data);
+    }
+
+    if (recentProductsResult.data) {
+      setRecentProducts(recentProductsResult.data);
+    }
+
+    setLoading(false);
+  };
+
+  const getQuoteStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      NEW: 'Novo',
+      IN_PROGRESS: 'Em andamento',
+      CONTACTED: 'Contatado',
+      WON: 'Ganho',
+      LOST: 'Perdido',
+    };
+    return labels[status] || status;
+  };
+
+  const getQuoteStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      NEW: 'default',
+      IN_PROGRESS: 'secondary',
+      CONTACTED: 'outline',
+      WON: 'default',
+      LOST: 'destructive',
+    };
+    return variants[status] || 'default';
   };
 
   const cards = [
@@ -106,24 +162,87 @@ export default function AdminDashboard() {
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Últimos Orçamentos</CardTitle>
+              <Link to="/admin/orcamentos" className="text-sm text-primary hover:underline flex items-center gap-1">
+                Ver todos <ExternalLink className="h-3 w-3" />
+              </Link>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Lista dos últimos orçamentos recebidos (em desenvolvimento)
-              </p>
+              {loading ? (
+                <p className="text-sm text-muted-foreground">Carregando...</p>
+              ) : recentQuotes.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum orçamento encontrado</p>
+              ) : (
+                <div className="space-y-3">
+                  {recentQuotes.map((quote) => (
+                    <Link
+                      key={quote.id}
+                      to={`/admin/orcamentos/${quote.id}`}
+                      className="block p-3 rounded-lg border border-border hover:bg-accent transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{quote.name}</p>
+                          {quote.company && (
+                            <p className="text-xs text-muted-foreground truncate">{quote.company}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDistanceToNow(new Date(quote.created_at), {
+                              addSuffix: true,
+                              locale: ptBR,
+                            })}
+                          </p>
+                        </div>
+                        <Badge variant={getQuoteStatusVariant(quote.status)} className="text-xs shrink-0">
+                          {getQuoteStatusLabel(quote.status)}
+                        </Badge>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Produtos Recentes</CardTitle>
+              <Link to="/admin/produtos" className="text-sm text-primary hover:underline flex items-center gap-1">
+                Ver todos <ExternalLink className="h-3 w-3" />
+              </Link>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Últimos produtos atualizados (em desenvolvimento)
-              </p>
+              {loading ? (
+                <p className="text-sm text-muted-foreground">Carregando...</p>
+              ) : recentProducts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum produto encontrado</p>
+              ) : (
+                <div className="space-y-3">
+                  {recentProducts.map((product) => (
+                    <Link
+                      key={product.id}
+                      to={`/admin/produtos/${product.id}`}
+                      className="block p-3 rounded-lg border border-border hover:bg-accent transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{product.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDistanceToNow(new Date(product.updated_at), {
+                              addSuffix: true,
+                              locale: ptBR,
+                            })}
+                          </p>
+                        </div>
+                        <Badge variant={product.status === 'ACTIVE' ? 'default' : 'secondary'} className="text-xs shrink-0">
+                          {product.status === 'ACTIVE' ? 'Ativo' : 'Rascunho'}
+                        </Badge>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

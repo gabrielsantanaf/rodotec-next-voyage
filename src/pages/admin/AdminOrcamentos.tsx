@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
@@ -11,9 +12,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type QuoteRequest = {
   id: string;
@@ -45,6 +54,7 @@ const statusColors: Record<string, 'default' | 'secondary' | 'destructive'> = {
 export default function AdminOrcamentos() {
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,13 +75,17 @@ export default function AdminOrcamentos() {
     setLoading(false);
   };
 
-  const filteredQuotes = quotes.filter(
-    (q) =>
+  const filteredQuotes = quotes.filter((q) => {
+    const matchesSearch =
       q.name.toLowerCase().includes(search.toLowerCase()) ||
       q.email.toLowerCase().includes(search.toLowerCase()) ||
       q.company?.toLowerCase().includes(search.toLowerCase()) ||
-      q.product_name.toLowerCase().includes(search.toLowerCase())
-  );
+      q.product_name.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus = statusFilter === 'ALL' || q.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <AdminLayout>
@@ -84,7 +98,7 @@ export default function AdminOrcamentos() {
         </div>
 
         <div className="bg-white rounded-lg border border-border">
-          <div className="p-4 border-b border-border">
+          <div className="p-4 border-b border-border space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -93,6 +107,28 @@ export default function AdminOrcamentos() {
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Status:</span>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Todos</SelectItem>
+                  <SelectItem value="NEW">Novo</SelectItem>
+                  <SelectItem value="IN_PROGRESS">Em andamento</SelectItem>
+                  <SelectItem value="CONTACTED">Contatado</SelectItem>
+                  <SelectItem value="WON">Ganho</SelectItem>
+                  <SelectItem value="LOST">Perdido</SelectItem>
+                </SelectContent>
+              </Select>
+              {statusFilter !== 'ALL' && (
+                <Button variant="ghost" size="sm" onClick={() => setStatusFilter('ALL')}>
+                  Limpar filtro
+                </Button>
+              )}
             </div>
           </div>
 
@@ -123,23 +159,45 @@ export default function AdminOrcamentos() {
                 </TableRow>
               ) : (
                 filteredQuotes.map((quote) => (
-                  <TableRow key={quote.id}>
+                  <TableRow key={quote.id} className="cursor-pointer hover:bg-accent">
                     <TableCell>
-                      <Badge variant={statusColors[quote.status]}>
-                        {statusLabels[quote.status]}
-                      </Badge>
+                      <Link to={`/admin/orcamentos/${quote.id}`}>
+                        <Badge variant={statusColors[quote.status]}>
+                          {statusLabels[quote.status]}
+                        </Badge>
+                      </Link>
                     </TableCell>
-                    <TableCell className="font-medium">{quote.name}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {quote.company || '—'}
+                    <TableCell>
+                      <Link to={`/admin/orcamentos/${quote.id}`} className="font-medium hover:underline">
+                        {quote.name}
+                      </Link>
                     </TableCell>
-                    <TableCell>{quote.product_name}</TableCell>
-                    <TableCell className="text-muted-foreground">{quote.phone}</TableCell>
-                    <TableCell className="text-muted-foreground">{quote.email}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(quote.created_at), 'dd/MM/yyyy HH:mm', {
-                        locale: ptBR,
-                      })}
+                    <TableCell>
+                      <Link to={`/admin/orcamentos/${quote.id}`} className="text-muted-foreground">
+                        {quote.company || '—'}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={`/admin/orcamentos/${quote.id}`}>
+                        {quote.product_name}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={`/admin/orcamentos/${quote.id}`} className="text-muted-foreground">
+                        {quote.phone}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={`/admin/orcamentos/${quote.id}`} className="text-muted-foreground">
+                        {quote.email}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={`/admin/orcamentos/${quote.id}`} className="text-muted-foreground text-sm">
+                        {format(new Date(quote.created_at), 'dd/MM/yyyy HH:mm', {
+                          locale: ptBR,
+                        })}
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))
