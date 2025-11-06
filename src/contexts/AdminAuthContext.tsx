@@ -1,13 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-
-type AdminRole = 'admin' | 'editor';
+import { authApi } from '@/services/api';
+import type { AdminUser, AdminRole } from '@/types/api';
 
 interface AdminAuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: AdminUser | null;
   role: AdminRole | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -18,85 +15,60 @@ interface AdminAuthContextType {
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AdminUser | null>(null);
   const [role, setRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Setup auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer role fetching with setTimeout
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserRole(session.user.id);
-          }, 0);
-        } else {
-          setRole(null);
-          setLoading(false);
-        }
-      }
-    );
+    // Verificar se existe token e carregar usuário
+    const initAuth = async () => {
+      const token = localStorage.getItem('auth_token');
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        setTimeout(() => {
-          fetchUserRole(session.user.id);
-        }, 0);
-      } else {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const currentUser = await authApi.getCurrentUser();
+        setUser(currentUser);
+        setRole(currentUser.role);
+      } catch (error) {
+        console.error('Error loading user:', error);
+        localStorage.removeItem('auth_token');
+        setUser(null);
+        setRole(null);
+      } finally {
         setLoading(false);
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    initAuth();
   }, []);
 
-  const fetchUserRole = async (userId: string) => {
+  const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching role:', error);
-        console.error('User ID:', userId);
-        console.error('Este usuário não tem uma role configurada. Execute:');
-        console.error(`INSERT INTO public.user_roles (user_id, role) VALUES ('${userId}', 'admin');`);
-        setRole(null);
-      } else {
-        setRole(data.role as AdminRole);
-      }
-    } catch (error) {
-      console.error('Error fetching role:', error);
-      setRole(null);
-    } finally {
-      setLoading(false);
+      const response = await authApi.login({ email, password });
+      setUser(response.user);
+      setRole(response.user.role);
+      return { error: null };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      return { error: { message: error.message || 'Erro ao fazer login' } };
     }
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
-  };
-
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setRole(null);
-    navigate('/admin/login');
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setRole(null);
+      navigate('/admin/login');
+    }
   };
 
   const hasRole = (requiredRole: AdminRole) => {
@@ -106,7 +78,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AdminAuthContext.Provider value={{ user, session, role, loading, signIn, signOut, hasRole }}>
+    <AdminAuthContext.Provider value={{ user, role, loading, signIn, signOut, hasRole }}>
       {children}
     </AdminAuthContext.Provider>
   );

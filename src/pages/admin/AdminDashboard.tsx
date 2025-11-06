@@ -1,35 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { dashboardApi } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Package, TrendingUp, CheckCircle2, ExternalLink } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-type QuoteRequest = {
-  id: string;
-  name: string;
-  company: string | null;
-  status: string;
-  created_at: string;
-};
-
-type Product = {
-  id: string;
-  title: string;
-  status: string;
-  updated_at: string;
-};
+import type { QuoteRequest, Product, QuoteStatus } from '@/types/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
-    newQuotes: 0,
-    inProgressQuotes: 0,
-    completedQuotes: 0,
-    activeProducts: 0,
-    draftProducts: 0,
+    new_quotes: 0,
+    in_progress_quotes: 0,
+    completed_quotes: 0,
+    active_products: 0,
+    draft_products: 0,
   });
   const [recentQuotes, setRecentQuotes] = useState<QuoteRequest[]>([]);
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
@@ -40,94 +26,67 @@ export default function AdminDashboard() {
   }, []);
 
   const loadDashboardData = async () => {
-    const [quotesResult, productsResult, recentQuotesResult, recentProductsResult] = await Promise.all([
-      supabase.from('quote_requests').select('status'),
-      supabase.from('products').select('status'),
-      supabase.from('quote_requests').select('id, name, company, status, created_at').order('created_at', { ascending: false }).limit(5),
-      supabase.from('products').select('id, title, status, updated_at').order('updated_at', { ascending: false }).limit(5),
-    ]);
+    try {
+      const [statsData, quotesData, productsData] = await Promise.all([
+        dashboardApi.getStats(),
+        dashboardApi.getRecentQuotes(5),
+        dashboardApi.getRecentProducts(5),
+      ]);
 
-    if (quotesResult.data) {
-      const newQuotes = quotesResult.data.filter((q) => q.status === 'NEW').length;
-      const inProgress = quotesResult.data.filter((q) => q.status === 'IN_PROGRESS').length;
-      const completed = quotesResult.data.filter(
-        (q) => q.status === 'WON' || q.status === 'CONTACTED'
-      ).length;
-
-      setStats((prev) => ({
-        ...prev,
-        newQuotes,
-        inProgressQuotes: inProgress,
-        completedQuotes: completed,
-      }));
+      setStats(statsData);
+      setRecentQuotes(quotesData);
+      setRecentProducts(productsData);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-
-    if (productsResult.data) {
-      const active = productsResult.data.filter((p) => p.status === 'ACTIVE').length;
-      const draft = productsResult.data.filter((p) => p.status === 'DRAFT').length;
-
-      setStats((prev) => ({
-        ...prev,
-        activeProducts: active,
-        draftProducts: draft,
-      }));
-    }
-
-    if (recentQuotesResult.data) {
-      setRecentQuotes(recentQuotesResult.data);
-    }
-
-    if (recentProductsResult.data) {
-      setRecentProducts(recentProductsResult.data);
-    }
-
-    setLoading(false);
   };
 
-  const getQuoteStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
+  const getQuoteStatusLabel = (status: QuoteStatus) => {
+    const labels: Record<QuoteStatus, string> = {
       NEW: 'Novo',
       IN_PROGRESS: 'Em andamento',
       CONTACTED: 'Contatado',
       WON: 'Ganho',
       LOST: 'Perdido',
     };
-    return labels[status] || status;
+    return labels[status];
   };
 
-  const getQuoteStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  const getQuoteStatusVariant = (status: QuoteStatus): "default" | "secondary" | "destructive" | "outline" => {
+    const variants: Record<QuoteStatus, "default" | "secondary" | "destructive" | "outline"> = {
       NEW: 'default',
       IN_PROGRESS: 'secondary',
       CONTACTED: 'outline',
       WON: 'default',
       LOST: 'destructive',
     };
-    return variants[status] || 'default';
+    return variants[status];
   };
 
   const cards = [
     {
       title: 'Novos Orçamentos',
-      value: stats.newQuotes,
+      value: stats.new_quotes,
       icon: FileText,
       color: 'text-blue-600',
     },
     {
       title: 'Em Andamento',
-      value: stats.inProgressQuotes,
+      value: stats.in_progress_quotes,
       icon: TrendingUp,
       color: 'text-orange-600',
     },
     {
       title: 'Concluídos',
-      value: stats.completedQuotes,
+      value: stats.completed_quotes,
       icon: CheckCircle2,
       color: 'text-green-600',
     },
     {
       title: 'Produtos Ativos',
-      value: stats.activeProducts,
+      value: stats.active_products,
       icon: Package,
       color: 'text-primary',
     },

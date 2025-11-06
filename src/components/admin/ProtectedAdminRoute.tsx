@@ -34,15 +34,8 @@ export function ProtectedAdminRoute({ children }: { children: React.ReactNode })
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Seu usuário não tem permissões de administrador configuradas.
+              Seu usuário não tem permissões de administrador. Entre em contato com o administrador do sistema.
             </p>
-            <div className="bg-muted p-3 rounded text-xs font-mono">
-              <p className="font-bold mb-2">Execute no Supabase SQL Editor:</p>
-              <code>
-                INSERT INTO public.user_roles (user_id, role)<br />
-                VALUES ('{user.id}', 'admin');
-              </code>
-            </div>
             <Button onClick={signOut} variant="outline" className="w-full">
               Fazer Logout
             </Button>
