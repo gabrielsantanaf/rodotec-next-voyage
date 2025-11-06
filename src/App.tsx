@@ -15,6 +15,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProdutos from "./pages/admin/AdminProdutos";
 import AdminProdutoEditor from "./pages/admin/AdminProdutoEditor";
+import MockProdutoEditor from "./pages/admin/MockProdutoEditor";
 import AdminOrcamentos from "./pages/admin/AdminOrcamentos";
 import AdminOrcamentoDetalhe from "./pages/admin/AdminOrcamentoDetalhe";
 
@@ -36,6 +37,9 @@ const App = () => (
             <Route path="/tecnologia" element={<Index />} />
             <Route path="/distribuidores" element={<Distribuidores />} />
             <Route path="/sobre" element={<Index />} />
+
+            {/* Sandbox público sem autenticação */}
+            <Route path="/sandbox/produtos/novo" element={<MockProdutoEditor />} />
 
             {/* Admin - Login */}
             <Route path="/admin/login" element={<AdminLogin />} />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { productsApi, categoriesApi } from '@/services/api';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -80,6 +80,9 @@ export default function AdminProdutoEditor() {
     published: false,
   });
 
+  const [uploading, setUploading] = useState(false);
+
+
   useEffect(() => {
     loadCategories();
     if (isEditing) {
@@ -88,32 +91,20 @@ export default function AdminProdutoEditor() {
   }, [id]);
 
   const loadCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name')
-      .order('name');
-
-    if (error) {
+    try {
+      const data = await categoriesApi.list();
+      // Ajustar para apenas id e name
+      setCategories((data || []).map((c: any) => ({ id: c.id, name: c.name })));
+    } catch (error) {
       console.error('Error loading categories:', error);
-    } else {
-      setCategories(data || []);
+      toast.error('Erro ao carregar categorias');
     }
   };
 
   const loadProduct = async () => {
     if (!id) return;
-
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      console.error('Error loading product:', error);
-      toast.error('Erro ao carregar produto');
-      navigate('/admin/produtos');
-    } else {
+    try {
+      const data = await productsApi.get(id);
       setFormData({
         ...data,
         price: data.price ? Number(data.price) : null,
@@ -124,6 +115,10 @@ export default function AdminProdutoEditor() {
         tags: data.tags || [],
         media: data.media || [],
       });
+    } catch (error) {
+      console.error('Error loading product:', error);
+      toast.error('Erro ao carregar produto');
+      navigate('/admin/produtos');
     }
     setLoading(false);
   };
@@ -147,8 +142,29 @@ export default function AdminProdutoEditor() {
   };
 
   const handleSave = async () => {
+    // Validações obrigatórias
     if (!formData.title.trim()) {
-      toast.error('O título é obrigatório');
+      toast.error('O nome do produto é obrigatório');
+      return;
+    }
+    if (!formData.description.trim()) {
+      toast.error('A descrição detalhada é obrigatória');
+      return;
+    }
+    if (formData.price === null || isNaN(formData.price) || formData.price <= 0) {
+      toast.error('Informe um preço unitário válido');
+      return;
+    }
+    if (!formData.category_id) {
+      toast.error('Selecione uma categoria');
+      return;
+    }
+    if (formData.stock_qty === undefined || formData.stock_qty < 0) {
+      toast.error('Informe a quantidade em estoque');
+      return;
+    }
+    if (!formData.media || formData.media.length === 0) {
+      toast.error('Adicione ao menos uma imagem do produto');
       return;
     }
 
@@ -156,23 +172,12 @@ export default function AdminProdutoEditor() {
 
     try {
       if (isEditing) {
-        const { error } = await supabase
-          .from('products')
-          .update(formData)
-          .eq('id', id);
-
-        if (error) throw error;
+        await productsApi.update(id!, formData);
         toast.success('Produto atualizado com sucesso');
       } else {
-        const { data, error } = await supabase
-          .from('products')
-          .insert([formData])
-          .select()
-          .single();
-
-        if (error) throw error;
+        const created = await productsApi.create(formData);
         toast.success('Produto criado com sucesso');
-        navigate(`/admin/produtos/${data.id}`);
+        navigate(`/admin/produtos/${created.id}`);
       }
     } catch (error: any) {
       console.error('Error saving product:', error);
@@ -180,6 +185,62 @@ export default function AdminProdutoEditor() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleFilesSelected = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const maxItems = 10;
+    const maxSizeBytes = 20 * 1024 * 1024; // 20MB por imagem
+    const accepted: { url: string; alt: string }[] = [];
+
+    setUploading(true);
+    try {
+      const currentCount = formData.media?.length || 0;
+      if (currentCount + files.length > maxItems) {
+        toast.error(`Máximo de ${maxItems} imagens por produto`);
+      }
+
+      const take = Math.min(files.length, Math.max(maxItems - currentCount, 0));
+      for (let i = 0; i < take; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) {
+          toast.error(`Arquivo não suportado: ${file.name}`);
+          continue;
+        }
+        if (file.size > maxSizeBytes) {
+          toast.error(`Imagem muito grande (${file.name}). Máx 20MB`);
+          continue;
+        }
+        // Converter para Data URL para armazenamento local
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        accepted.push({ url: dataUrl, alt: formData.title || file.name });
+      }
+
+      if (accepted.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          media: [...(prev.media || []), ...accepted],
+        }));
+        toast.success(`${accepted.length} imagem(ns) adicionada(s)`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Falha ao processar imagens');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      media: (prev.media || []).filter((_, i) => i !== index),
+    }));
   };
 
   const handleDiscard = () => {
@@ -259,14 +320,48 @@ export default function AdminProdutoEditor() {
                 <CardTitle>Mídia</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Arraste imagens ou clique para fazer upload
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                <div
+                  className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors"
+                >
+                  <Label htmlFor="product-images" className="sr-only">Upload de imagens</Label>
+                  <input
+                    id="product-images"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => handleFilesSelected(e.target.files)}
+                    className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-muted file:text-foreground hover:file:bg-accent"
+                    aria-describedby="images-help"
+                  />
+                  <p id="images-help" className="text-xs text-muted-foreground mt-2">
                     Até 10 imagens, máximo 20 MB cada
                   </p>
                 </div>
+
+                {formData.media && formData.media.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {formData.media.map((m, idx) => (
+                      <div key={idx} className="relative group">
+                        <img
+                          src={m.url}
+                          alt={m.alt || formData.title || 'Imagem do produto'}
+                          className="aspect-square w-full object-cover rounded-md border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          className="absolute top-2 right-2 bg-background/70 border rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label="Remover imagem"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {uploading && (
+                  <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">Processando imagens...</p>
+                )}
               </CardContent>
             </Card>
 

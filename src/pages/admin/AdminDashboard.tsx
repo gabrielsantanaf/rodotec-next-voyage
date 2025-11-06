@@ -8,6 +8,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { QuoteRequest, Product, QuoteStatus } from '@/types/api';
+import { toast } from 'sonner';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -38,6 +39,7 @@ export default function AdminDashboard() {
       setRecentProducts(productsData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      toast.error('Falha ao carregar dados do dashboard. Usando dados locais quando possível.');
     } finally {
       setLoading(false);
     }

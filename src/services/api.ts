@@ -10,6 +10,7 @@ import type {
   PaginatedResponse,
   ApiResponse,
 } from '@/types/api';
+import { supabase } from '@/integrations/supabase/client';
 
 // Configuração da API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
@@ -56,7 +57,14 @@ async function fetchApi<T>(
     );
   }
 
-  return response.json();
+  // Parse seguro: evita erro em respostas 204/sem corpo
+  const text = await response.text().catch(() => '');
+  try {
+    return (text ? JSON.parse(text) : ({} as T));
+  } catch {
+    // Se não for JSON, retorna texto bruto
+    return (text as unknown as T);
+  }
 }
 
 // ============ AUTENTICAÇÃO ============
@@ -94,22 +102,55 @@ export const authApi = {
 
 export const dashboardApi = {
   getStats: async (): Promise<DashboardStats> => {
-    const response = await fetchApi<ApiResponse<DashboardStats>>('/dashboard/stats');
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<DashboardStats>>('/dashboard/stats');
+      return response.data;
+    } catch (error) {
+      // Fallback: calcular estatísticas locais via stub
+      console.warn('API indisponível, usando dados locais para stats:', error);
+      const { data: products } = await supabase.from('products').select('status');
+      const { data: quotes } = await supabase.from('quote_requests').select('status');
+      const stats: DashboardStats = {
+        new_quotes: (quotes || []).filter((q: any) => q.status === 'NEW').length,
+        in_progress_quotes: (quotes || []).filter((q: any) => q.status === 'IN_PROGRESS').length,
+        completed_quotes: (quotes || []).filter((q: any) => q.status === 'WON' || q.status === 'LOST').length,
+        active_products: (products || []).filter((p: any) => p.status === 'ACTIVE').length,
+        draft_products: (products || []).filter((p: any) => p.status === 'DRAFT').length,
+      };
+      return stats;
+    }
   },
 
   getRecentQuotes: async (limit = 5) => {
-    const response = await fetchApi<ApiResponse<QuoteRequest[]>>(
-      `/dashboard/recent-quotes?limit=${limit}`
-    );
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<QuoteRequest[]>>(
+        `/dashboard/recent-quotes?limit=${limit}`
+      );
+      return response.data;
+    } catch (error) {
+      console.warn('API indisponível, usando dados locais para recent-quotes:', error);
+      const { data } = await supabase
+        .from('quote_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      return (data || []).slice(0, limit);
+    }
   },
 
   getRecentProducts: async (limit = 5) => {
-    const response = await fetchApi<ApiResponse<Product[]>>(
-      `/dashboard/recent-products?limit=${limit}`
-    );
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<Product[]>>(
+        `/dashboard/recent-products?limit=${limit}`
+      );
+      return response.data;
+    } catch (error) {
+      console.warn('API indisponível, usando dados locais para recent-products:', error);
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .order('updated_at', { ascending: false });
+      return (data || []).slice(0, limit);
+    }
   },
 };
 
@@ -125,29 +166,89 @@ export const productsApi = {
     if (filters?.per_page) params.append('per_page', filters.per_page.toString());
 
     const query = params.toString() ? `?${params.toString()}` : '';
-    const response = await fetchApi<PaginatedResponse<Product>>(`/products${query}`);
-    return response;
+    try {
+      const response = await fetchApi<PaginatedResponse<Product>>(`/products${query}`);
+      return response;
+    } catch (error) {
+      console.warn('API indisponível, usando dados locais para listagem de produtos:', error);
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      const filtered = (data || []).filter((p: any) => {
+        const search = filters?.search?.toLowerCase();
+        if (!search) return true;
+        return (
+          (p.title || '').toLowerCase().includes(search) ||
+          (p.sku || '').toLowerCase().includes(search)
+        );
+      });
+
+      return {
+        data: filtered,
+        meta: {
+          current_page: 1,
+          per_page: filtered.length,
+          total: filtered.length,
+          total_pages: 1,
+        },
+      };
+    }
   },
 
   get: async (id: string): Promise<Product> => {
-    const response = await fetchApi<ApiResponse<Product>>(`/products/${id}`);
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<Product>>(`/products/${id}`);
+      return response.data;
+    } catch (error) {
+      console.warn('API indisponível, usando dados locais para obter produto:', error);
+      const { data, error: supaErr } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (supaErr) throw new ApiError(supaErr.message);
+      return data as Product;
+    }
   },
 
   create: async (data: Partial<Product>): Promise<Product> => {
-    const response = await fetchApi<ApiResponse<Product>>('/products', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<Product>>('/products', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.data;
+    } catch (error) {
+      console.warn('API indisponível, usando stub local para criar produto:', error);
+      const insertRes = await supabase.from('products').insert([data]);
+      if (insertRes.error) throw new ApiError(insertRes.error.message);
+      const created = Array.isArray(insertRes.data) ? insertRes.data[0] : insertRes.data;
+      return created as Product;
+    }
   },
 
   update: async (id: string, data: Partial<Product>): Promise<Product> => {
-    const response = await fetchApi<ApiResponse<Product>>(`/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<Product>>(`/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+      return response.data;
+    } catch (error) {
+      console.warn('API indisponível, usando stub local para atualizar produto:', error);
+      const updateRes = await supabase.from('products').update(data).eq('id', id);
+      if (updateRes.error) throw new ApiError(updateRes.error.message);
+      // Buscar registro atualizado
+      const { data: updated, error: supaErr } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (supaErr) throw new ApiError(supaErr.message);
+      return updated as Product;
+    }
   },
 
   delete: async (id: string): Promise<void> => {
@@ -215,8 +316,18 @@ export const quotesApi = {
 
 export const categoriesApi = {
   list: async (): Promise<Category[]> => {
-    const response = await fetchApi<ApiResponse<Category[]>>('/categories');
-    return response.data;
+    try {
+      const response = await fetchApi<ApiResponse<Category[]>>('/categories');
+      return response.data;
+    } catch (error) {
+      console.warn('API indisponível, usando stub local para categorias:', error);
+      const { data, error: supaErr } = await supabase
+        .from('categories')
+        .select('id, name')
+        .order('name');
+      if (supaErr) throw new ApiError(supaErr.message);
+      return (data || []) as Category[];
+    }
   },
 
   get: async (id: string): Promise<Category> => {

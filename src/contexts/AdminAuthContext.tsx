@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '@/services/api';
+import { localAuth } from '@/services/localAuth';
 import type { AdminUser, AdminRole } from '@/types/api';
 
 interface AdminAuthContextType {
@@ -31,7 +31,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const currentUser = await authApi.getCurrentUser();
+        const currentUser = await localAuth.getCurrentUser();
         setUser(currentUser);
         setRole(currentUser.role);
       } catch (error) {
@@ -49,7 +49,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await authApi.login({ email, password });
+      const response = await localAuth.login({ email, password });
       setUser(response.user);
       setRole(response.user.role);
       return { error: null };
@@ -61,7 +61,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await authApi.logout();
+      await localAuth.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

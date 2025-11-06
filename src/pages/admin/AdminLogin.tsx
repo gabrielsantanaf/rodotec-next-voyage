@@ -26,6 +26,23 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      // Basic validations
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailValid) {
+        toast.error('E-mail inválido', {
+          description: 'Informe um e-mail válido.',
+        });
+        setLoading(false);
+        return;
+      }
+      if (password.length < 6) {
+        toast.error('Senha muito curta', {
+          description: 'A senha deve ter ao menos 6 caracteres.',
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error } = await signIn(email, password);
 
       if (error) {
