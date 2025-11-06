@@ -70,6 +70,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching role:', error);
+        console.error('User ID:', userId);
+        console.error('Este usuário não tem uma role configurada. Execute:');
+        console.error(`INSERT INTO public.user_roles (user_id, role) VALUES ('${userId}', 'admin');`);
         setRole(null);
       } else {
         setRole(data.role as AdminRole);

@@ -1,39 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAdminAuth();
+  const { signIn, user, role, loading: authLoading } = useAdminAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+
+  // Se já está autenticado com role, redirecionar
+  useEffect(() => {
+    if (user && role && !authLoading) {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, role, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    try {
+      const { error } = await signIn(email, password);
 
-    if (error) {
-      toast({
-        title: 'Erro ao fazer login',
-        description: error.message,
-        variant: 'destructive',
+      if (error) {
+        toast.error('Erro ao fazer login', {
+          description: error.message,
+        });
+        setLoading(false);
+      } else {
+        toast.success('Login realizado!', {
+          description: 'Carregando seu perfil...',
+        });
+        // O redirecionamento será feito pelo useEffect quando o role for carregado
+      }
+    } catch (err) {
+      toast.error('Erro ao fazer login', {
+        description: 'Ocorreu um erro inesperado',
       });
       setLoading(false);
-    } else {
-      toast({
-        title: 'Login realizado!',
-        description: 'Bem-vindo ao Admin RODOTEC',
-      });
-      navigate('/admin');
     }
   };
 
