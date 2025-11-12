@@ -311,8 +311,8 @@ const Index = () => {
                 Anos de experiência
               </p>
             </div>
-            <div className="rounded-2xl border border-line bg-card p-8 text-center">
-              <div className="mb-2 font-heading text-5xl font-bold text-success">
+            <div className="rounded-2xl border border-steel/20 bg-card p-8 text-center">
+              <div className="mb-2 font-heading text-5xl font-bold text-rodotec-blue">
                 3 anos
               </div>
               <p className="text-muted-foreground">
@@ -358,7 +358,7 @@ const Index = () => {
                 readTime: "5 min"
               }
             ].map((item, index) => (
-              <Card key={index} className="group relative overflow-hidden rounded-2xl transition-all hover:border-accent hover:shadow-lg">
+              <Card key={index} className="group relative overflow-hidden rounded-2xl border-steel/20 transition-all hover:border-rodotec-blue/40 hover:shadow-lg">
                 <div 
                   className="absolute inset-0 opacity-5"
                   style={{
@@ -366,8 +366,8 @@ const Index = () => {
                   }}
                 />
                 <div className="relative p-6">
-                  <div className="mb-4 h-40 rounded-xl bg-surface-2" />
-                  <span className="mb-2 inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
+                  <div className="mb-4 h-40 rounded-xl bg-steel/20" />
+                  <span className="mb-2 inline-block rounded-full bg-rodotec-blue/10 px-3 py-1 text-xs font-medium text-rodotec-blue">
                     {item.category}
                   </span>
                   <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
@@ -384,12 +384,12 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative overflow-hidden bg-bg py-20 lg:ml-24">
+      <section className="relative overflow-hidden bg-navy py-20 lg:ml-24">
         <div className="relative container mx-auto px-4 lg:px-8 text-center">
           <h2 className="mb-6 font-heading text-4xl font-bold text-white md:text-5xl">
             Encontre um Distribuidor
           </h2>
-          <p className="mb-8 text-xl text-muted-foreground">
+          <p className="mb-8 text-xl text-white/80">
             Mais de 50 pontos de venda em todo o Brasil
           </p>
           <Link to="/distribuidores">

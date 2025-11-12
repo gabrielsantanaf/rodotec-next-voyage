@@ -79,7 +79,7 @@ const Contato = () => {
       <Header />
 
       {/* Breadcrumb */}
-      <section className="border-b border-line bg-surface-2 py-4">
+      <section className="border-b border-steel/20 bg-steel/5 py-4">
         <div className="container mx-auto px-4">
           <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Link to="/" className="hover:text-foreground">Home</Link>
@@ -90,12 +90,12 @@ const Contato = () => {
       </section>
 
       {/* Hero */}
-      <section className="bg-bg py-16">
+      <section className="bg-navy py-16">
         <div className="container mx-auto px-4">
           <h1 className="font-heading text-4xl font-bold text-white md:text-5xl">
             Entre em Contato
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mt-4 max-w-2xl text-lg text-white/80">
             Estamos prontos para atender você. Preencha o formulário ou use nossos canais diretos.
           </p>
         </div>
@@ -106,9 +106,9 @@ const Contato = () => {
           <div className="grid gap-12 lg:grid-cols-3">
             {/* Contact Info */}
             <div className="space-y-6">
-              <Card>
+              <Card className="border-steel/20">
                 <CardContent className="p-6">
-                  <MapPin className="mb-4 h-8 w-8 text-accent" />
+                  <MapPin className="mb-4 h-8 w-8 text-rodotec-blue" />
                   <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
                     Endereço
                   </h3>
@@ -120,9 +120,9 @@ const Contato = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-steel/20">
                 <CardContent className="p-6">
-                  <Phone className="mb-4 h-8 w-8 text-accent" />
+                  <Phone className="mb-4 h-8 w-8 text-rodotec-blue" />
                   <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
                     Telefone
                   </h3>
@@ -134,9 +134,9 @@ const Contato = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-steel/20">
                 <CardContent className="p-6">
-                  <Mail className="mb-4 h-8 w-8 text-accent" />
+                  <Mail className="mb-4 h-8 w-8 text-rodotec-blue" />
                   <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
                     E-mail
                   </h3>
@@ -151,7 +151,7 @@ const Contato = () => {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <Card>
+              <Card className="border-steel/20">
                 <CardContent className="p-8">
                   <h2 className="mb-6 font-heading text-2xl font-bold text-foreground">
                     Solicitar Orçamento
@@ -167,6 +167,7 @@ const Contato = () => {
                           required
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="border-steel/20"
                         />
                       </div>
 
@@ -177,6 +178,7 @@ const Contato = () => {
                           placeholder="Nome da empresa"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                          className="border-steel/20"
                         />
                       </div>
                     </div>
@@ -191,6 +193,7 @@ const Contato = () => {
                           required
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="border-steel/20"
                         />
                       </div>
 
@@ -203,6 +206,7 @@ const Contato = () => {
                           required
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="border-steel/20"
                         />
                       </div>
                     </div>
@@ -210,7 +214,7 @@ const Contato = () => {
                     <div className="space-y-2">
                       <Label htmlFor="product">Produto de Interesse</Label>
                       <Select value={formData.productName} onValueChange={(value) => setFormData({ ...formData, productName: value })}>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-steel/20">
                           <SelectValue placeholder="Selecione um produto" />
                         </SelectTrigger>
                         <SelectContent>
@@ -233,7 +237,7 @@ const Contato = () => {
                         required
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="resize-none"
+                        className="border-steel/20 resize-none"
                       />
                     </div>
 
@@ -244,11 +248,11 @@ const Contato = () => {
                         required
                         checked={formData.consentLGPD}
                         onChange={(e) => setFormData({ ...formData, consentLGPD: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-line"
+                        className="mt-1 h-4 w-4 rounded border-steel/20"
                       />
                       <Label htmlFor="terms" className="text-sm text-muted-foreground">
                         Concordo com a{" "}
-                        <a href="#" className="text-accent hover:underline">
+                        <a href="#" className="text-rodotec-blue hover:underline">
                           Política de Privacidade
                         </a>{" "}
                         e autorizo o contato da RODOTEC

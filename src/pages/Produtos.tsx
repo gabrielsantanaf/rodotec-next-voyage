@@ -97,23 +97,23 @@ const Produtos = () => {
       <Header />
 
       {/* Breadcrumb */}
-      <div className="border-b border-line bg-surface py-4">
+      <div className="border-b border-steel/20 bg-navy/50 py-4">
         <div className="container mx-auto px-4">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+          <nav className="flex items-center gap-2 text-sm text-white/70">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">Produtos</span>
+            <span className="text-white">Produtos</span>
           </nav>
         </div>
       </div>
 
       {/* Hero */}
-      <section className="bg-bg py-16">
+      <section className="bg-navy py-16">
         <div className="container mx-auto px-4">
           <h1 className="font-heading text-4xl font-bold text-white md:text-5xl">
             Nossos Produtos
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mt-4 max-w-2xl text-lg text-white/80">
             Soluções completas em carrocerias e implementos para transporte rodoviário
           </p>
         </div>
@@ -136,8 +136,8 @@ const Produtos = () => {
                     onClick={() => setActiveCategory(category.id)}
                     className={`flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-left transition-all ${
                       isActive
-                        ? "bg-brand text-white shadow-lg"
-                        : "bg-card text-foreground hover:bg-surface-2"
+                        ? "bg-rodotec-blue text-white shadow-lg"
+                        : "bg-card text-foreground hover:bg-steel/5"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -159,7 +159,7 @@ const Produtos = () => {
                   onClick={() => setActiveCategory(category.id)}
                   className={`flex shrink-0 items-center space-x-2 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
                     isActive
-                      ? "bg-brand text-white"
+                      ? "bg-rodotec-blue text-white"
                       : "bg-card text-foreground"
                   }`}
                 >

@@ -42,14 +42,14 @@ const ProdutoDetalhe = () => {
       <SideNav />
 
       <main className="pb-20 lg:ml-24">
-      <section className="border-b border-line bg-surface py-4">
+      <section className="border-b border-steel/20 bg-navy/50 py-4">
         <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+          <nav className="flex items-center gap-2 text-sm text-white/70">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <span>/</span>
-            <Link to="/produtos" className="hover:text-foreground transition-colors">Produtos</Link>
+            <Link to="/produtos" className="hover:text-white transition-colors">Produtos</Link>
             <span>/</span>
-            <span className="text-foreground">Carroceria Baú em Alumínio</span>
+            <span className="text-white">Carroceria Baú em Alumínio</span>
           </nav>
         </div>
       </section>
@@ -59,7 +59,7 @@ const ProdutoDetalhe = () => {
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Image */}
-            <div className="relative overflow-hidden rounded-2xl border border-line bg-surface-2">
+            <div className="relative overflow-hidden rounded-2xl border border-steel/20 bg-steel/5">
               <img
                 src={productCarroceria}
                 alt="Carroceria Baú em Alumínio"
@@ -84,25 +84,25 @@ const ProdutoDetalhe = () => {
                 </h3>
                 <ul className="space-y-2">
                   <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
+                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
                     <span className="text-muted-foreground">
                       Redução de até 40% na tara comparado a carrocerias convencionais
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
+                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
                     <span className="text-muted-foreground">
                       Material resistente à corrosão sem necessidade de pintura periódica
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
+                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
                     <span className="text-muted-foreground">
                       Estanqueidade superior para proteção total da carga
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
+                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
                     <span className="text-muted-foreground">
                       Sistema de ventilação otimizado para cargas sensíveis
                     </span>
@@ -125,7 +125,7 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Why This Product */}
-      <section className="bg-surface-2 py-16">
+      <section className="bg-steel/5 py-16">
         <div className="container mx-auto px-4">
           <h2 className="mb-12 text-center font-heading text-3xl font-bold text-foreground md:text-4xl">
             Por que escolher este produto
@@ -134,9 +134,9 @@ const ProdutoDetalhe = () => {
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon;
               return (
-                <Card key={index}>
+                <Card key={index} className="border-steel/20">
                   <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand text-white">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rodotec-blue text-white">
                       <Icon className="h-6 w-6" />
                     </div>
                     <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
@@ -161,11 +161,11 @@ const ProdutoDetalhe = () => {
               Especificações Técnicas
             </h2>
 
-            <Card className="mb-8">
+            <Card className="mb-8 border-steel/20">
               <CardContent className="p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   {specifications.map((spec, index) => (
-                    <div key={index} className="flex justify-between border-b border-line pb-3 last:border-0">
+                    <div key={index} className="flex justify-between border-b border-steel/10 pb-3 last:border-0">
                       <span className="font-medium text-muted-foreground">{spec.label}</span>
                       <span className="font-bold text-foreground">{spec.value}</span>
                     </div>
@@ -175,7 +175,7 @@ const ProdutoDetalhe = () => {
             </Card>
 
             <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="applications" className="rounded-2xl border border-line bg-card px-6">
+              <AccordionItem value="applications" className="rounded-2xl border border-steel/20 bg-card px-6">
                 <AccordionTrigger className="font-heading font-bold hover:no-underline">
                   Aplicações Ideais
                 </AccordionTrigger>
@@ -187,7 +187,7 @@ const ProdutoDetalhe = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="compatibility" className="rounded-2xl border border-line bg-card px-6">
+              <AccordionItem value="compatibility" className="rounded-2xl border border-steel/20 bg-card px-6">
                 <AccordionTrigger className="font-heading font-bold hover:no-underline">
                   Compatibilidade
                 </AccordionTrigger>
@@ -201,7 +201,7 @@ const ProdutoDetalhe = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="optionals" className="rounded-2xl border border-line bg-card px-6">
+              <AccordionItem value="optionals" className="rounded-2xl border border-steel/20 bg-card px-6">
                 <AccordionTrigger className="font-heading font-bold hover:no-underline">
                   Opcionais Disponíveis
                 </AccordionTrigger>
@@ -219,16 +219,16 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Downloads */}
-      <section className="bg-surface-2 py-16">
+      <section className="bg-steel/5 py-16">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="mb-8 font-heading text-3xl font-bold text-foreground">
               Documentação Técnica
             </h2>
             <div className="grid gap-4 md:grid-cols-3">
-              <Card className="transition-all hover:border-accent">
+              <Card className="border-steel/20 transition-all hover:border-rodotec-blue/40">
                 <CardContent className="p-6 text-center">
-                  <FileText className="mx-auto mb-4 h-12 w-12 text-accent" />
+                  <FileText className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
                   <h3 className="mb-2 font-heading font-bold text-foreground">Catálogo</h3>
                   <p className="mb-4 text-sm text-muted-foreground">PDF • 2.4 MB</p>
                   <Button variant="outline" size="sm" className="w-full">
@@ -238,9 +238,9 @@ const ProdutoDetalhe = () => {
                 </CardContent>
               </Card>
 
-              <Card className="transition-all hover:border-accent">
+              <Card className="border-steel/20 transition-all hover:border-rodotec-blue/40">
                 <CardContent className="p-6 text-center">
-                  <FileText className="mx-auto mb-4 h-12 w-12 text-accent" />
+                  <FileText className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
                   <h3 className="mb-2 font-heading font-bold text-foreground">Ficha Técnica</h3>
                   <p className="mb-4 text-sm text-muted-foreground">PDF • 1.1 MB</p>
                   <Button variant="outline" size="sm" className="w-full">
@@ -250,9 +250,9 @@ const ProdutoDetalhe = () => {
                 </CardContent>
               </Card>
 
-              <Card className="transition-all hover:border-accent">
+              <Card className="border-steel/20 transition-all hover:border-rodotec-blue/40">
                 <CardContent className="p-6 text-center">
-                  <FileText className="mx-auto mb-4 h-12 w-12 text-accent" />
+                  <FileText className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
                   <h3 className="mb-2 font-heading font-bold text-foreground">Manual</h3>
                   <p className="mb-4 text-sm text-muted-foreground">PDF • 3.8 MB</p>
                   <Button variant="outline" size="sm" className="w-full">
@@ -267,12 +267,12 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* CTA */}
-      <section className="bg-bg py-16">
+      <section className="bg-navy py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="mb-6 font-heading text-3xl font-bold text-white md:text-4xl">
             Interessado neste produto?
           </h2>
-          <p className="mb-8 text-xl text-muted-foreground">
+          <p className="mb-8 text-xl text-white/80">
             Fale com um especialista ou encontre o distribuidor mais próximo
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
@@ -291,7 +291,7 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* CTA Sticky Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-line bg-white/95 p-4 backdrop-blur-sm lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-steel/20 bg-white/95 p-4 backdrop-blur-sm lg:hidden">
         <div className="flex gap-2">
           <Button 
             className="btn-hero flex-1 gap-2"
@@ -301,7 +301,7 @@ const ProdutoDetalhe = () => {
             WhatsApp
           </Button>
           <Link to="/contato" className="flex-1">
-            <Button variant="outline" className="w-full gap-2">
+            <Button variant="outline" className="w-full gap-2 border-rodotec-blue text-rodotec-blue">
               <Mail className="h-5 w-5" />
               Orçamento
             </Button>
