@@ -19,10 +19,12 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        navy: "hsl(var(--navy))",
-        steel: "hsl(var(--steel))",
-        "rodotec-blue": "hsl(var(--rodotec-blue))",
-        "tech-gold": "hsl(var(--tech-gold))",
+        bg: "hsl(var(--bg))",
+        surface: "hsl(var(--surface))",
+        brand: "hsl(var(--brand))",
+        "brand-600": "hsl(var(--brand-600))",
+        "brand-700": "hsl(var(--brand-700))",
+        accent: "hsl(var(--accent))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -80,8 +82,8 @@ export default {
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px hsl(var(--rodotec-blue) / 0.2)" },
-          "50%": { boxShadow: "0 0 32px hsl(var(--rodotec-blue) / 0.4)" },
+          "0%, 100%": { boxShadow: "0 0 20px hsl(var(--accent) / 0.2)" },
+          "50%": { boxShadow: "0 0 32px hsl(var(--accent) / 0.4)" },
         },
       },
       animation: {

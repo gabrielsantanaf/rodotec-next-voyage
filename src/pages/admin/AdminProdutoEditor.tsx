@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { productsApi, categoriesApi } from '@/services/api';
+import { repository, slugify } from '@/data/repository';
+import type { Product } from '@/data/types';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,42 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, Save, X } from 'lucide-react';
+import { ChevronLeft, Save, X, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-type Product = {
-  id?: string;
-  title: string;
-  slug: string;
-  description: string;
-  status: 'ACTIVE' | 'DRAFT';
-  price: number | null;
-  sku: string;
-  barcode: string;
-  stock_qty: number;
-  allow_backorder: boolean;
-  weight_kg: number | null;
-  dimensions_l: number | null;
-  dimensions_a: number | null;
-  dimensions_p: number | null;
-  country_of_origin: string;
-  hs_code: string;
-  type: string;
-  manufacturer: string;
-  media: any[];
-  category_id: string | null;
-  seo_title: string;
-  seo_description: string;
-  tags: string[];
-  published: boolean;
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
 
 export default function AdminProdutoEditor() {
   const { id } = useParams();
@@ -52,156 +20,83 @@ export default function AdminProdutoEditor() {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [uploading, setUploading] = useState(false);
 
-  const [formData, setFormData] = useState<Product>({
+  const [formData, setFormData] = useState<Partial<Product>>({
     title: '',
     slug: '',
     description: '',
+    short_description: '',
     status: 'DRAFT',
     price: null,
-    sku: '',
-    barcode: '',
+    sku: null,
     stock_qty: 0,
-    allow_backorder: false,
-    weight_kg: null,
-    dimensions_l: null,
-    dimensions_a: null,
-    dimensions_p: null,
-    country_of_origin: 'Brasil',
-    hs_code: '',
-    type: '',
-    manufacturer: '',
-    media: [],
-    category_id: null,
-    seo_title: '',
-    seo_description: '',
-    tags: [],
-    published: false,
+    category_id: '',
+    images: [],
+    technical_specs: {},
+    dimensions: {},
+    seo_title: null,
+    seo_description: null,
   });
 
-  const [uploading, setUploading] = useState(false);
-
+  const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([]);
+  const categories = repository.getCategories();
 
   useEffect(() => {
-    loadCategories();
-    if (isEditing) {
+    if (isEditing && id) {
       loadProduct();
+    } else {
+      setLoading(false);
     }
-  }, [id]);
+  }, [id, isEditing]);
 
-  const loadCategories = async () => {
-    try {
-      const data = await categoriesApi.list();
-      // Ajustar para apenas id e name
-      setCategories((data || []).map((c: any) => ({ id: c.id, name: c.name })));
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      toast.error('Erro ao carregar categorias');
-    }
-  };
-
-  const loadProduct = async () => {
+  const loadProduct = () => {
     if (!id) return;
-    try {
-      const data = await productsApi.get(id);
-      setFormData({
-        ...data,
-        price: data.price ? Number(data.price) : null,
-        weight_kg: data.weight_kg ? Number(data.weight_kg) : null,
-        dimensions_l: data.dimensions_l ? Number(data.dimensions_l) : null,
-        dimensions_a: data.dimensions_a ? Number(data.dimensions_a) : null,
-        dimensions_p: data.dimensions_p ? Number(data.dimensions_p) : null,
-        tags: data.tags || [],
-        media: data.media || [],
-      });
-    } catch (error) {
-      console.error('Error loading product:', error);
-      toast.error('Erro ao carregar produto');
+    const product = repository.getProduct(id);
+    if (!product) {
+      toast.error('Produto não encontrado');
       navigate('/admin/produtos');
+      return;
     }
+    setFormData(product);
+    // Convert technical_specs to array
+    const specsArray = Object.entries(product.technical_specs || {}).map(([key, value]) => ({
+      key,
+      value: String(value),
+    }));
+    setSpecs(specsArray);
     setLoading(false);
   };
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
+  const generateSlug = useCallback((title: string) => {
+    return slugify(title);
+  }, []);
 
   const handleTitleChange = (title: string) => {
     setFormData((prev) => ({
       ...prev,
       title,
       slug: generateSlug(title),
-      seo_title: title,
+      seo_title: title || prev.seo_title,
     }));
-  };
-
-  const handleSave = async () => {
-    // Validações obrigatórias
-    if (!formData.title.trim()) {
-      toast.error('O nome do produto é obrigatório');
-      return;
-    }
-    if (!formData.description.trim()) {
-      toast.error('A descrição detalhada é obrigatória');
-      return;
-    }
-    if (formData.price === null || isNaN(formData.price) || formData.price <= 0) {
-      toast.error('Informe um preço unitário válido');
-      return;
-    }
-    if (!formData.category_id) {
-      toast.error('Selecione uma categoria');
-      return;
-    }
-    if (formData.stock_qty === undefined || formData.stock_qty < 0) {
-      toast.error('Informe a quantidade em estoque');
-      return;
-    }
-    if (!formData.media || formData.media.length === 0) {
-      toast.error('Adicione ao menos uma imagem do produto');
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      if (isEditing) {
-        await productsApi.update(id!, formData);
-        toast.success('Produto atualizado com sucesso');
-      } else {
-        const created = await productsApi.create(formData);
-        toast.success('Produto criado com sucesso');
-        navigate(`/admin/produtos/${created.id}`);
-      }
-    } catch (error: any) {
-      console.error('Error saving product:', error);
-      toast.error(error.message || 'Erro ao salvar produto');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleFilesSelected = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const maxItems = 10;
-    const maxSizeBytes = 20 * 1024 * 1024; // 20MB por imagem
-    const accepted: { url: string; alt: string }[] = [];
+    const maxSizeBytes = 20 * 1024 * 1024; // 20MB
 
     setUploading(true);
     try {
-      const currentCount = formData.media?.length || 0;
+      const currentCount = formData.images?.length || 0;
       if (currentCount + files.length > maxItems) {
         toast.error(`Máximo de ${maxItems} imagens por produto`);
+        setUploading(false);
+        return;
       }
 
-      const take = Math.min(files.length, Math.max(maxItems - currentCount, 0));
-      for (let i = 0; i < take; i++) {
+      const newImages: string[] = [];
+      for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (!file.type.startsWith('image/')) {
           toast.error(`Arquivo não suportado: ${file.name}`);
@@ -211,22 +106,23 @@ export default function AdminProdutoEditor() {
           toast.error(`Imagem muito grande (${file.name}). Máx 20MB`);
           continue;
         }
-        // Converter para Data URL para armazenamento local
+
+        // Convert to Data URL for local storage
         const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(file);
         });
-        accepted.push({ url: dataUrl, alt: formData.title || file.name });
+        newImages.push(dataUrl);
       }
 
-      if (accepted.length > 0) {
+      if (newImages.length > 0) {
         setFormData((prev) => ({
           ...prev,
-          media: [...(prev.media || []), ...accepted],
+          images: [...(prev.images || []), ...newImages],
         }));
-        toast.success(`${accepted.length} imagem(ns) adicionada(s)`);
+        toast.success(`${newImages.length} imagem(ns) adicionada(s)`);
       }
     } catch (err) {
       console.error(err);
@@ -239,8 +135,69 @@ export default function AdminProdutoEditor() {
   const handleRemoveImage = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      media: (prev.media || []).filter((_, i) => i !== index),
+      images: (prev.images || []).filter((_, i) => i !== index),
     }));
+  };
+
+  const handleAddSpec = () => {
+    setSpecs([...specs, { key: '', value: '' }]);
+  };
+
+  const handleRemoveSpec = (index: number) => {
+    setSpecs(specs.filter((_, i) => i !== index));
+  };
+
+  const handleSpecChange = (index: number, field: 'key' | 'value', value: string) => {
+    const newSpecs = [...specs];
+    newSpecs[index][field] = value;
+    setSpecs(newSpecs);
+  };
+
+  const handleSave = () => {
+    // Validations
+    if (!formData.title?.trim() || formData.title.length < 3) {
+      toast.error('O nome do produto deve ter pelo menos 3 caracteres');
+      return;
+    }
+    if (!formData.category_id) {
+      toast.error('Selecione uma categoria');
+      return;
+    }
+    if (formData.status === 'ACTIVE' && (!formData.images || formData.images.length === 0)) {
+      toast.error('Adicione ao menos uma imagem para publicar o produto');
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      // Convert specs array to object
+      const technical_specs: Record<string, string> = {};
+      specs.forEach((spec) => {
+        if (spec.key.trim()) {
+          technical_specs[spec.key.trim()] = spec.value.trim();
+        }
+      });
+
+      const productData: Partial<Product> = {
+        ...formData,
+        technical_specs,
+      };
+
+      if (isEditing && id) {
+        repository.updateProduct(id, productData);
+        toast.success('Produto atualizado com sucesso');
+      } else {
+        const created = repository.createProduct(productData);
+        toast.success('Produto criado com sucesso');
+        navigate(`/admin/produtos/${created.id}`);
+      }
+    } catch (error: any) {
+      console.error('Error saving product:', error);
+      toast.error(error.message || 'Erro ao salvar produto');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -286,7 +243,7 @@ export default function AdminProdutoEditor() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna Principal */}
+          {/* Main Column */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
@@ -297,18 +254,37 @@ export default function AdminProdutoEditor() {
                   <Label htmlFor="title">Título *</Label>
                   <Input
                     id="title"
-                    value={formData.title}
+                    value={formData.title || ''}
                     onChange={(e) => handleTitleChange(e.target.value)}
                     placeholder="Nome do produto"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">Descrição</Label>
+                  <Label htmlFor="slug">Slug</Label>
+                  <Input
+                    id="slug"
+                    value={formData.slug || ''}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    placeholder="slug-do-produto"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="short_description">Descrição curta</Label>
+                  <Textarea
+                    id="short_description"
+                    value={formData.short_description || ''}
+                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                    placeholder="Breve descrição do produto"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Descrição detalhada</Label>
                   <Textarea
                     id="description"
-                    value={formData.description}
+                    value={formData.description || ''}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Descrição detalhada do produto"
+                    placeholder="Descrição completa do produto"
                     rows={6}
                   />
                 </div>
@@ -320,37 +296,36 @@ export default function AdminProdutoEditor() {
                 <CardTitle>Mídia</CardTitle>
               </CardHeader>
               <CardContent>
-                <div
-                  className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors"
-                >
-                  <Label htmlFor="product-images" className="sr-only">Upload de imagens</Label>
+                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                  <Label htmlFor="product-images" className="cursor-pointer">
+                    <span className="text-sm font-medium">Clique para adicionar imagens</span>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Até 10 imagens, máximo 20 MB cada
+                    </p>
+                  </Label>
                   <input
                     id="product-images"
                     type="file"
                     accept="image/*"
                     multiple
                     onChange={(e) => handleFilesSelected(e.target.files)}
-                    className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-muted file:text-foreground hover:file:bg-accent"
-                    aria-describedby="images-help"
+                    className="hidden"
                   />
-                  <p id="images-help" className="text-xs text-muted-foreground mt-2">
-                    Até 10 imagens, máximo 20 MB cada
-                  </p>
                 </div>
 
-                {formData.media && formData.media.length > 0 && (
+                {formData.images && formData.images.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {formData.media.map((m, idx) => (
+                    {formData.images.map((img, idx) => (
                       <div key={idx} className="relative group">
                         <img
-                          src={m.url}
-                          alt={m.alt || formData.title || 'Imagem do produto'}
+                          src={img}
+                          alt={`${formData.title} - Imagem ${idx + 1}`}
                           className="aspect-square w-full object-cover rounded-md border"
                         />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(idx)}
-                          className="absolute top-2 right-2 bg-background/70 border rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 bg-background/90 border rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                           aria-label="Remover imagem"
                         >
                           <X className="h-4 w-4" />
@@ -360,139 +335,121 @@ export default function AdminProdutoEditor() {
                   </div>
                 )}
                 {uploading && (
-                  <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">Processando imagens...</p>
+                  <p className="mt-2 text-sm text-muted-foreground">Processando imagens...</p>
                 )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Preço</CardTitle>
+                <CardTitle>Especificações técnicas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="price">Preço (BRL)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price || ''}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : null })}
-                    placeholder="0.00"
-                  />
-                </div>
+                {specs.map((spec, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <Input
+                      placeholder="Nome"
+                      value={spec.key}
+                      onChange={(e) => handleSpecChange(idx, 'key', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Valor"
+                      value={spec.value}
+                      onChange={(e) => handleSpecChange(idx, 'value', e.target.value)}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveSpec(idx)}
+                      aria-label="Remover especificação"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" onClick={handleAddSpec}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar especificação
+                </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Estoque</CardTitle>
+                <CardTitle>Dimensões</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="sku">SKU</Label>
+                    <Label htmlFor="width">Largura (m)</Label>
                     <Input
-                      id="sku"
-                      value={formData.sku}
-                      onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                      placeholder="SKU-000"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="barcode">Código de barras</Label>
-                    <Input
-                      id="barcode"
-                      value={formData.barcode}
-                      onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                      placeholder="0000000000000"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="stock_qty">Quantidade</Label>
-                  <Input
-                    id="stock_qty"
-                    type="number"
-                    value={formData.stock_qty}
-                    onChange={(e) => setFormData({ ...formData, stock_qty: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="allow_backorder">Permitir vender sem estoque</Label>
-                  <Switch
-                    id="allow_backorder"
-                    checked={formData.allow_backorder}
-                    onCheckedChange={(checked) => setFormData({ ...formData, allow_backorder: checked })}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Frete</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="weight_kg">Peso (kg)</Label>
-                  <Input
-                    id="weight_kg"
-                    type="number"
-                    step="0.01"
-                    value={formData.weight_kg || ''}
-                    onChange={(e) => setFormData({ ...formData, weight_kg: e.target.value ? parseFloat(e.target.value) : null })}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="dimensions_l">Comprimento (cm)</Label>
-                    <Input
-                      id="dimensions_l"
+                      id="width"
                       type="number"
                       step="0.01"
-                      value={formData.dimensions_l || ''}
-                      onChange={(e) => setFormData({ ...formData, dimensions_l: e.target.value ? parseFloat(e.target.value) : null })}
+                      value={formData.dimensions?.width || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          dimensions: {
+                            ...formData.dimensions,
+                            width: e.target.value ? parseFloat(e.target.value) : undefined,
+                          },
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <Label htmlFor="dimensions_a">Largura (cm)</Label>
+                    <Label htmlFor="height">Altura (m)</Label>
                     <Input
-                      id="dimensions_a"
+                      id="height"
                       type="number"
                       step="0.01"
-                      value={formData.dimensions_a || ''}
-                      onChange={(e) => setFormData({ ...formData, dimensions_a: e.target.value ? parseFloat(e.target.value) : null })}
+                      value={formData.dimensions?.height || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          dimensions: {
+                            ...formData.dimensions,
+                            height: e.target.value ? parseFloat(e.target.value) : undefined,
+                          },
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <Label htmlFor="dimensions_p">Altura (cm)</Label>
+                    <Label htmlFor="length">Comprimento (m)</Label>
                     <Input
-                      id="dimensions_p"
+                      id="length"
                       type="number"
                       step="0.01"
-                      value={formData.dimensions_p || ''}
-                      onChange={(e) => setFormData({ ...formData, dimensions_p: e.target.value ? parseFloat(e.target.value) : null })}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="country_of_origin">País de origem</Label>
-                    <Input
-                      id="country_of_origin"
-                      value={formData.country_of_origin}
-                      onChange={(e) => setFormData({ ...formData, country_of_origin: e.target.value })}
+                      value={formData.dimensions?.length || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          dimensions: {
+                            ...formData.dimensions,
+                            length: e.target.value ? parseFloat(e.target.value) : undefined,
+                          },
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <Label htmlFor="hs_code">Código SH</Label>
+                    <Label htmlFor="weight">Peso (kg)</Label>
                     <Input
-                      id="hs_code"
-                      value={formData.hs_code}
-                      onChange={(e) => setFormData({ ...formData, hs_code: e.target.value })}
-                      placeholder="0000.00.00"
+                      id="weight"
+                      type="number"
+                      step="0.01"
+                      value={formData.dimensions?.weight || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          dimensions: {
+                            ...formData.dimensions,
+                            weight: e.target.value ? parseFloat(e.target.value) : undefined,
+                          },
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -501,104 +458,79 @@ export default function AdminProdutoEditor() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Listagem em mecanismos de pesquisa</CardTitle>
+                <CardTitle>SEO</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="seo_title">Título SEO</Label>
                   <Input
                     id="seo_title"
-                    value={formData.seo_title}
+                    value={formData.seo_title || ''}
                     onChange={(e) => setFormData({ ...formData, seo_title: e.target.value })}
-                    placeholder="Título para mecanismos de busca"
+                    placeholder="Título para motores de busca"
                   />
                 </div>
                 <div>
                   <Label htmlFor="seo_description">Descrição SEO</Label>
                   <Textarea
                     id="seo_description"
-                    value={formData.seo_description}
+                    value={formData.seo_description || ''}
                     onChange={(e) => setFormData({ ...formData, seo_description: e.target.value })}
-                    placeholder="Descrição para mecanismos de busca"
+                    placeholder="Descrição para motores de busca"
                     rows={3}
                   />
-                </div>
-                <div>
-                  <Label>URL</Label>
-                  <div className="text-sm text-muted-foreground">
-                    /produtos/{formData.slug || 'slug-do-produto'}
-                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Coluna Lateral */}
+          {/* Sidebar */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Status</CardTitle>
               </CardHeader>
-              <CardContent>
-                <Select value={formData.status} onValueChange={(value: 'ACTIVE' | 'DRAFT') => setFormData({ ...formData, status: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Ativo</SelectItem>
-                    <SelectItem value="DRAFT">Rascunho</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Publicação</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="published">Site</Label>
-                  <Switch
-                    id="published"
-                    checked={formData.published}
-                    onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
-                  />
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value: 'ACTIVE' | 'DRAFT') =>
+                      setFormData({ ...formData, status: value })
+                    }
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DRAFT">Rascunho</SelectItem>
+                      <SelectItem value="ACTIVE">Publicado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Badge variant={formData.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                    {formData.status === 'ACTIVE' ? 'Publicado' : 'Rascunho'}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Organização do produto</CardTitle>
+                <CardTitle>Organização</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="type">Tipo</Label>
-                  <Input
-                    id="type"
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    placeholder="Ex: Filtro, Bomba, Acessório"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="manufacturer">Fabricante</Label>
-                  <Input
-                    id="manufacturer"
-                    value={formData.manufacturer}
-                    onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
-                    placeholder="Nome do fabricante"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Categoria</Label>
-                  <Select value={formData.category_id || ''} onValueChange={(value) => setFormData({ ...formData, category_id: value || null })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma categoria" />
+                  <Label htmlFor="category">Categoria *</Label>
+                  <Select
+                    value={formData.category_id || ''}
+                    onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                  >
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhuma</SelectItem>
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>
                           {cat.name}
@@ -607,24 +539,47 @@ export default function AdminProdutoEditor() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
-                  <Input
-                    id="tags"
-                    value={formData.tags.join(', ')}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
-                    placeholder="tag1, tag2, tag3"
-                  />
-                </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Modelo de tema</CardTitle>
+                <CardTitle>Preço e Estoque</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">Produto padrão</p>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="price">Preço (R$)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    value={formData.price || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : null })
+                    }
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sku">SKU</Label>
+                  <Input
+                    id="sku"
+                    value={formData.sku || ''}
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    placeholder="SKU-000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="stock">Estoque</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    value={formData.stock_qty || 0}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock_qty: parseInt(e.target.value) || 0 })
+                    }
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>

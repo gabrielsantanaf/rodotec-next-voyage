@@ -8,14 +8,16 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* RODOTEC Brand Colors - Refined Industrial */
-    --bg: 210 50% 9%;                 /* #101820 - Main background */
-    --surface: 210 45% 17%;           /* #15222E - Cards/surfaces */
+    /* RODOTEC Brand Colors - Dark Blue Industrial */
+    --bg: 210 58% 11%;                /* #0E1A2B - Main background (darker) */
+    --surface: 214 52% 15%;           /* #132238 - Cards/surfaces */
     --text: 210 30% 97%;              /* #F5F7FA - Primary text */
     --text-muted: 210 15% 70%;        /* #A7B0B9 - Secondary text */
-    --line: 210 40% 19%;              /* #203040 - Borders/lines */
-    --brand: 217 100% 53%;            /* #0D6EFD - Primary brand */
-    --brand-700: 217 100% 38%;        /* #094DB4 - Brand dark */
+    --line: 213 45% 19%;              /* #1D334D - Borders/lines */
+    --brand: 210 87% 25%;             /* #0B3B7A - Primary brand (darker) */
+    --brand-600: 210 84% 21%;         /* #0A2F63 - Brand hover */
+    --brand-700: 214 94% 26%;         /* #072C7E - Brand active/focus */
+    --accent: 207 80% 51%;            /* #1E88E5 - Accent details */
     --success: 142 71% 45%;           /* #22C55E - Success */
     --warning: 38 92% 50%;            /* #F59E0B - Warning */
     
@@ -29,7 +31,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 210 50% 9%;
     
-    --primary: 217 100% 53%;          /* Brand blue */
+    --primary: 210 87% 25%;           /* Brand blue - darker */
     --primary-foreground: 0 0% 100%;
     
     --secondary: 210 20% 96%;
@@ -38,7 +40,7 @@ All colors MUST be HSL.
     --muted: 210 20% 95%;
     --muted-foreground: 210 15% 70%;
     
-    --accent: 217 100% 53%;
+    --accent: 207 80% 51%;
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;
@@ -46,19 +48,19 @@ All colors MUST be HSL.
     
     --border: 210 25% 88%;
     --input: 210 25% 88%;
-    --ring: 217 100% 53%;
+    --ring: 214 94% 26%;
     
     --radius: 0.5rem;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(210 50% 9%), hsl(210 45% 17%));
-    --gradient-hero: linear-gradient(180deg, hsl(210 50% 9% / 0.95), hsl(210 45% 17% / 0.88));
+    --gradient-primary: linear-gradient(135deg, hsl(210 58% 11%), hsl(214 52% 15%));
+    --gradient-hero: linear-gradient(180deg, rgba(10, 20, 35, 0) 0%, rgba(10, 20, 35, 0.6) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
     
     /* Shadows */
-    --shadow-card: 0 2px 12px hsl(210 50% 9% / 0.06);
-    --shadow-elevated: 0 8px 24px hsl(210 50% 9% / 0.12);
-    --shadow-focus: 0 0 0 3px hsl(217 100% 53% / 0.15);
+    --shadow-card: 0 2px 12px hsl(210 58% 11% / 0.08);
+    --shadow-elevated: 0 8px 24px hsl(210 58% 11% / 0.15);
+    --shadow-focus: 0 0 0 3px hsl(214 94% 26% / 0.2);
     
     /* Transitions */
     --transition-smooth: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -66,33 +68,33 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 210 50% 9%;         /* #101820 */
+    --background: 210 58% 11%;        /* #0E1A2B */
     --foreground: 210 30% 97%;        /* #F5F7FA */
     
-    --card: 210 45% 17%;              /* #15222E */
+    --card: 214 52% 15%;              /* #132238 */
     --card-foreground: 210 30% 97%;
     
-    --popover: 210 45% 17%;
+    --popover: 214 52% 15%;
     --popover-foreground: 210 30% 97%;
     
-    --primary: 217 100% 53%;          /* #0D6EFD */
+    --primary: 210 87% 25%;           /* #0B3B7A */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 210 45% 17%;
+    --secondary: 214 52% 15%;
     --secondary-foreground: 210 30% 97%;
     
-    --muted: 210 40% 19%;
+    --muted: 213 45% 19%;
     --muted-foreground: 210 15% 70%;
     
-    --accent: 217 100% 53%;
+    --accent: 207 80% 51%;
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 30% 97%;
     
-    --border: 210 40% 19%;
-    --input: 210 40% 19%;
-    --ring: 217 100% 53%;
+    --border: 213 45% 19%;
+    --input: 213 45% 19%;
+    --ring: 214 94% 26%;
   }
 }
 
@@ -122,9 +124,10 @@ All colors MUST be HSL.
   /* Hero Button Variant */
   .btn-hero {
     @apply relative overflow-hidden rounded-xl px-8 py-4 font-semibold;
-    @apply bg-[hsl(var(--rodotec-blue))] text-white;
+    @apply bg-[hsl(var(--brand))] text-white;
     @apply transition-all duration-200;
-    @apply hover:shadow-[var(--shadow-glow)] hover:scale-105;
+    @apply hover:bg-[hsl(var(--brand-600))] hover:shadow-[var(--shadow-elevated)] hover:scale-105;
+    @apply focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-700))];
   }
   
   .btn-hero-secondary {
@@ -139,7 +142,7 @@ All colors MUST be HSL.
   .card-glow {
     @apply transition-all duration-200;
     @apply hover:shadow-[var(--shadow-elevated)];
-    @apply hover:border-[hsl(var(--rodotec-blue))]/40;
+    @apply hover:border-[hsl(var(--accent))]/40;
   }
   
   /* Smooth Scroll */
