@@ -1,17 +1,72 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Zap, Award, Users, Sparkles, Cpu, Recycle } from "lucide-react";
+import { ArrowRight, Shield, Zap, Award, Users, CheckCircle2, Phone, Mail, Loader2, Sparkles, Cpu, Recycle } from "lucide-react";
 import Header from "@/components/Header";
 import { ImprovedFooter } from "@/components/ImprovedFooter";
 import ProductCard from "@/components/ProductCard";
 import SideNav from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { repository } from "@/data/repository";
 import heroImage from "@/assets/hero-truck.jpg";
 import productCarroceria from "@/assets/product-carroceria.jpg";
 import productReboque from "@/assets/product-reboque.jpg";
 import techWelding from "@/assets/tech-welding.jpg";
 
 const Index = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    company: "",
+    phone: "",
+    email: "",
+    message: ""
+  });
+  const [formLoading, setFormLoading] = useState(false);
+  const [formSuccess, setFormSuccess] = useState(false);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormLoading(true);
+
+    try {
+      repository.createQuote({
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        company_name: formData.company,
+        product_interest: null,
+        message: formData.message,
+        status: 'NEW',
+        internal_notes: null,
+      });
+
+      setFormSuccess(true);
+      toast.success("Solicitação enviada!", {
+        description: "Entraremos em contato em breve."
+      });
+
+      setFormData({
+        name: "",
+        company: "",
+        phone: "",
+        email: "",
+        message: ""
+      });
+
+      setTimeout(() => setFormSuccess(false), 5000);
+    } catch (error) {
+      toast.error("Erro ao enviar", {
+        description: "Tente novamente ou entre em contato por telefone."
+      });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   const products = [
     {
       title: "Carrocerias em Alumínio",
@@ -327,12 +382,6 @@ const Index = () => {
 
       {/* CTA Section */}
       <section className="relative overflow-hidden bg-navy py-20 lg:ml-24">
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            background: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40 L40 0 L40 20 L20 40 Z' fill='%230E2A47' transform='rotate(42 40 40)'/%3E%3C/svg%3E")`,
-          }}
-        />
         <div className="relative container mx-auto px-4 lg:px-8 text-center">
           <h2 className="mb-6 font-heading text-4xl font-bold text-white md:text-5xl">
             Encontre um Distribuidor
@@ -346,6 +395,142 @@ const Index = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Formulário de Contato */}
+      <section className="py-20 lg:ml-24">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-12 text-center">
+              <h2 className="mb-4 font-heading text-4xl font-bold text-foreground md:text-5xl">
+                Solicite um Orçamento
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Preencha o formulário e entraremos em contato em até 24 horas
+              </p>
+            </div>
+
+            {formSuccess ? (
+              <Card className="p-8 text-center border-green-500/40 bg-green-500/10">
+                <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
+                <h3 className="font-heading text-2xl font-bold text-foreground mb-2">
+                  Solicitação Enviada!
+                </h3>
+                <p className="text-muted-foreground">
+                  Recebemos sua mensagem e entraremos em contato em breve.
+                </p>
+              </Card>
+            ) : (
+              <Card className="p-8">
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Completo *</Label>
+                      <Input
+                        id="name"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Seu nome"
+                        disabled={formLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Empresa</Label>
+                      <Input
+                        id="company"
+                        value={formData.company}
+                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        placeholder="Nome da empresa"
+                        disabled={formLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone *</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="(11) 99999-9999"
+                        disabled={formLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">E-mail *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="seu@email.com"
+                        disabled={formLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Mensagem *</Label>
+                    <Textarea
+                      id="message"
+                      required
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      placeholder="Conte-nos sobre seu projeto ou necessidade"
+                      rows={5}
+                      disabled={formLoading}
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full"
+                    disabled={formLoading}
+                  >
+                    {formLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        Enviar Solicitação
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Card>
+            )}
+
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+              <Card className="p-6 text-center">
+                <Phone className="mx-auto h-8 w-8 text-primary mb-3" />
+                <h3 className="font-heading font-bold text-foreground mb-2">
+                  Telefone
+                </h3>
+                <a href="tel:+551130000000" className="text-primary hover:underline">
+                  (11) 3000-0000
+                </a>
+              </Card>
+              <Card className="p-6 text-center">
+                <Mail className="mx-auto h-8 w-8 text-primary mb-3" />
+                <h3 className="font-heading font-bold text-foreground mb-2">
+                  E-mail
+                </h3>
+                <a href="mailto:contato@rodotec.com.br" className="text-primary hover:underline">
+                  contato@rodotec.com.br
+                </a>
+              </Card>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -20,8 +20,8 @@ function generateToken(): string {
 }
 
 function saveSession(user: AdminUser, token: string) {
+  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_TOKEN_KEY, token);
-  // Do not store password; only minimal user profile
   localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user));
 }
 
@@ -48,12 +48,15 @@ export const localAuth = {
     return { user, token };
   },
 
-  async logout(): Promise<void> {
+  logout(): void {
+    if (typeof window === 'undefined') return;
     localStorage.removeItem(STORAGE_TOKEN_KEY);
     localStorage.removeItem(STORAGE_USER_KEY);
   },
 
   async getCurrentUser(): Promise<AdminUser> {
+    if (typeof window === 'undefined') throw new Error('Sessão não encontrada');
+    
     const token = localStorage.getItem(STORAGE_TOKEN_KEY);
     const raw = localStorage.getItem(STORAGE_USER_KEY);
 

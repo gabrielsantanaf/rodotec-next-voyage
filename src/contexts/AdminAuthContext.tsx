@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { localAuth } from '@/services/localAuth';
 import type { AdminUser, AdminRole } from '@/types/api';
 
@@ -8,7 +7,7 @@ interface AdminAuthContextType {
   role: AdminRole | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
+  signOut: () => void;
   hasRole: (requiredRole: AdminRole) => boolean;
 }
 
@@ -18,10 +17,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [role, setRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Verificar se existe token e carregar usuário
+    if (typeof window === 'undefined') return;
+    
     const initAuth = async () => {
       const token = localStorage.getItem('auth_token');
 
@@ -59,15 +58,14 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signOut = async () => {
+  const signOut = () => {
     try {
-      await localAuth.logout();
+      localAuth.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
       setRole(null);
-      navigate('/admin/login');
     }
   };
 

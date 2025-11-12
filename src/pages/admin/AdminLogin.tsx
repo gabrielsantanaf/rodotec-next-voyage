@@ -26,35 +26,16 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // Basic validations
-      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      if (!emailValid) {
-        toast.error('E-mail inválido', {
-          description: 'Informe um e-mail válido.',
-        });
-        setLoading(false);
-        return;
-      }
-      if (password.length < 6) {
-        toast.error('Senha muito curta', {
-          description: 'A senha deve ter ao menos 6 caracteres.',
-        });
-        setLoading(false);
-        return;
-      }
-
       const { error } = await signIn(email, password);
 
       if (error) {
         toast.error('Erro ao fazer login', {
-          description: error.message,
+          description: error.message || 'Credenciais inválidas',
         });
         setLoading(false);
       } else {
-        toast.success('Login realizado!', {
-          description: 'Carregando seu perfil...',
-        });
-        // O redirecionamento será feito pelo useEffect quando o role for carregado
+        toast.success('Login realizado!');
+        // Redirecionamento será feito pelo useEffect
       }
     } catch (err) {
       toast.error('Erro ao fazer login', {
@@ -71,6 +52,9 @@ export default function AdminLogin() {
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-bold text-foreground">RODOTEC</h1>
             <p className="text-muted-foreground mt-2">Admin</p>
+            <p className="text-xs text-muted-foreground mt-4">
+              Login: admin@rodotec.com.br | Senha: admin123
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

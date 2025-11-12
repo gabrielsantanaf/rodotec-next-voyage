@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { repository } from '@/data/repository';
 import { useToast } from '@/hooks/use-toast';
@@ -52,6 +52,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAdminAuth();
   const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
 
   const isActive = (path: string) => {
     if (path === '/admin') {
@@ -109,6 +110,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleSignOut = () => {
+    signOut();
+    navigate('/admin/login');
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F6F8]">
       {/* Top Bar */}
@@ -160,7 +166,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="text-destructive">
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
                 </DropdownMenuItem>
