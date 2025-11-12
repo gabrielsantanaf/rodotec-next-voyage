@@ -78,24 +78,24 @@ const Distribuidores = () => {
 
       <main className="lg:ml-24">
         {/* Breadcrumb */}
-        <div className="border-b border-steel/20 bg-navy/50 py-4">
+        <div className="border-b border-line bg-surface py-4">
           <div className="container mx-auto px-4 lg:px-8">
-            <nav className="flex items-center gap-2 text-sm text-white/70">
-              <a href="/" className="hover:text-white transition-colors">Home</a>
+            <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+              <a href="/" className="hover:text-foreground transition-colors">Home</a>
               <span>/</span>
-              <span className="text-white">Distribuidores</span>
+              <span className="text-foreground">Distribuidores</span>
             </nav>
           </div>
         </div>
 
         {/* Hero Section */}
-        <section className="bg-navy py-16">
+        <section className="bg-bg py-16">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="max-w-3xl">
               <h1 className="mb-4 font-heading text-4xl font-bold text-white md:text-5xl">
                 Rede de Distribuidores e Assistência Técnica
               </h1>
-              <p className="text-xl text-white/80">
+              <p className="text-xl text-muted-foreground">
                 Mais de 50 pontos de venda em todo o Brasil para atender você com excelência
               </p>
             </div>
@@ -138,8 +138,8 @@ const Distribuidores = () => {
                 {dealers.map((dealer) => (
                   <Card
                     key={dealer.id}
-                    className={`cursor-pointer rounded-2xl border-steel/20 p-6 transition-all hover:border-rodotec-blue/40 hover:shadow-lg ${
-                      selectedDealer === dealer.id ? "border-rodotec-blue shadow-lg" : ""
+                    className={`cursor-pointer rounded-2xl p-6 transition-all hover:border-accent hover:shadow-lg ${
+                      selectedDealer === dealer.id ? "border-accent shadow-lg" : ""
                     }`}
                     onClick={() => setSelectedDealer(dealer.id)}
                   >
@@ -149,12 +149,12 @@ const Distribuidores = () => {
 
                     <div className="space-y-2 text-sm text-muted-foreground">
                       <div className="flex items-start gap-2">
-                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-rodotec-blue" />
+                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                         <span>{dealer.address}</span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 shrink-0 text-rodotec-blue" />
+                        <Clock className="h-4 w-4 shrink-0 text-accent" />
                         <span>{dealer.hours}</span>
                       </div>
 
@@ -162,7 +162,7 @@ const Distribuidores = () => {
                         {dealer.services.map((service) => (
                           <span
                             key={service}
-                            className="inline-flex items-center gap-1 rounded-full bg-rodotec-blue/10 px-3 py-1 text-xs font-medium text-rodotec-blue"
+                            className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
                           >
                             <Wrench className="h-3 w-3" />
                             {service}
@@ -223,10 +223,10 @@ const Distribuidores = () => {
 
               {/* Map Placeholder - 60% */}
               <div className="lg:col-span-3">
-                <Card className="sticky top-4 h-[600px] overflow-hidden rounded-2xl border-steel/20">
-                  <div className="flex h-full items-center justify-center bg-steel/10">
+                <Card className="sticky top-4 h-[600px] overflow-hidden rounded-2xl">
+                  <div className="flex h-full items-center justify-center bg-surface-2">
                     <div className="text-center">
-                      <MapPin className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
+                      <MapPin className="mx-auto mb-4 h-12 w-12 text-accent" />
                       <p className="text-lg font-medium text-muted-foreground">
                         Mapa interativo em desenvolvimento
                       </p>
@@ -242,12 +242,12 @@ const Distribuidores = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-navy py-20">
+        <section className="bg-bg py-20">
           <div className="container mx-auto px-4 text-center lg:px-8">
             <h2 className="mb-6 font-heading text-4xl font-bold text-white md:text-5xl">
               Não encontrou o que procurava?
             </h2>
-            <p className="mb-8 text-xl text-white/80">
+            <p className="mb-8 text-xl text-muted-foreground">
               Entre em contato conosco e encontraremos a melhor solução
             </p>
             <Button size="lg" className="btn-hero">
