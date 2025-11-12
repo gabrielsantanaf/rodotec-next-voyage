@@ -44,7 +44,7 @@ const SideNav = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 z-40 hidden h-[calc(100vh-4rem)] bg-steel/95 backdrop-blur-sm transition-all duration-300 lg:block",
+        "fixed left-0 top-16 z-40 hidden h-[calc(100vh-4rem)] bg-surface backdrop-blur-sm border-r border-line transition-all duration-300 lg:block",
         isExpanded ? "w-80" : "w-24"
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -62,11 +62,11 @@ const SideNav = () => {
               className={cn(
                 "group flex items-center gap-4 rounded-xl p-4 transition-all duration-200",
                 active
-                  ? "bg-rodotec-blue text-white shadow-glow"
-                  : "text-white/70 hover:bg-white/5 hover:text-white focus:animate-pulse focus:outline-none focus:ring-2 focus:ring-rodotec-blue"
+                  ? "bg-brand text-white shadow-[var(--shadow-elevated)]"
+                  : "text-muted-foreground hover:bg-surface-2 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-brand-700"
               )}
             >
-              <Icon className={cn("h-6 w-6 shrink-0", active && "animate-pulse")} />
+              <Icon className={cn("h-6 w-6 shrink-0", active && "text-white")} />
               
               {isExpanded && (
                 <div className="flex flex-1 items-center gap-3 overflow-hidden">

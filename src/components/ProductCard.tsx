@@ -14,7 +14,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ title, image, features, badge, link }: ProductCardProps) => {
   return (
-    <Card className="card-glow group overflow-hidden rounded-2xl border-steel/30 bg-card">
+    <Card className="card-glow group overflow-hidden rounded-2xl border-line bg-card">
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={image}
@@ -22,7 +22,7 @@ const ProductCard = ({ title, image, features, badge, link }: ProductCardProps) 
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {badge && (
-          <Badge className="absolute right-4 top-4 bg-rodotec-blue text-white">
+          <Badge className="absolute right-4 top-4 bg-brand text-white">
             {badge}
           </Badge>
         )}
@@ -35,13 +35,13 @@ const ProductCard = ({ title, image, features, badge, link }: ProductCardProps) 
         <ul className="mb-6 space-y-2">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-rodotec-blue mt-0.5" />
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-accent mt-0.5" />
               <span>{feature}</span>
             </li>
           ))}
         </ul>
         <Link to={link}>
-          <Button variant="outline" className="w-full border-rodotec-blue/20 text-rodotec-blue hover:bg-rodotec-blue hover:text-white">
+          <Button variant="outline" className="w-full">
             Ver Detalhes
           </Button>
         </Link>

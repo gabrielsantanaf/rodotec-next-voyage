@@ -43,7 +43,7 @@ export function MegaMenu({ isOpen, onClose }: MegaMenuProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="absolute left-0 right-0 top-full bg-card border-t border-border shadow-elevated z-50">
+    <div className="absolute left-0 right-0 top-full bg-surface border-t border-line shadow-[var(--shadow-elevated)] z-50">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {productCategories.map((category) => (
@@ -57,7 +57,7 @@ export function MegaMenu({ isOpen, onClose }: MegaMenuProps) {
                     key={item.slug}
                     to={`/produtos/${item.slug}`}
                     onClick={onClose}
-                    className="group flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                    className="group flex items-center justify-between p-3 rounded-lg hover:bg-surface-2 transition-colors"
                   >
                     <span className="text-sm text-muted-foreground group-hover:text-foreground">
                       {item.name}
@@ -70,11 +70,11 @@ export function MegaMenu({ isOpen, onClose }: MegaMenuProps) {
           ))}
         </div>
         
-        <div className="mt-6 pt-6 border-t border-border">
+        <div className="mt-6 pt-6 border-t border-line">
           <Link
             to="/produtos"
             onClick={onClose}
-            className="inline-flex items-center text-primary hover:text-primary/80 font-medium"
+            className="inline-flex items-center text-accent hover:text-accent/80 font-medium"
           >
             Ver todos os produtos
             <ChevronRight className="h-4 w-4 ml-1" />

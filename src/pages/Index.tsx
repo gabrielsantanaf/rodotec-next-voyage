@@ -140,7 +140,10 @@ const Index = () => {
           />
           {/* Diagonal mask 42° com gradiente autoral */}
           <div 
-            className="diagonal-mask-42 absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/70 to-transparent"
+            className="diagonal-mask-42 absolute inset-0"
+            style={{
+              background: 'linear-gradient(to right, rgba(14, 26, 43, 0.65) 0%, rgba(14, 26, 43, 0.1) 100%)'
+            }}
           />
         </div>
         
@@ -209,13 +212,13 @@ const Index = () => {
       </section>
 
       {/* Technology Mosaic - Asymmetric Grid */}
-      <section className="bg-navy py-20 lg:ml-24">
+      <section className="bg-bg py-20 lg:ml-24">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="mb-4 font-heading text-4xl font-bold text-white md:text-5xl">
               Tecnologia & Inovação
             </h2>
-            <p className="text-lg text-white/70">
+            <p className="text-lg text-muted-foreground">
               Excelência em cada processo produtivo
             </p>
           </div>
@@ -223,17 +226,17 @@ const Index = () => {
           {/* Asymmetric Mosaic Grid - Autoral Layout */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:grid-rows-2">
             {/* Large Card 1 - Spans 2 columns */}
-            <Card className="group relative col-span-1 overflow-hidden rounded-2xl border-steel/40 bg-steel/60 backdrop-blur-sm transition-all hover:border-rodotec-blue/60 md:col-span-2 md:row-span-2">
-              <div className="absolute inset-0 bg-gradient-to-br from-rodotec-blue/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Card className="group relative col-span-1 overflow-hidden rounded-2xl border-line bg-surface backdrop-blur-sm transition-all hover:border-accent md:col-span-2 md:row-span-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               <div className="relative h-full p-8 flex flex-col justify-between">
                 <div>
-                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-rodotec-blue/20 text-rodotec-blue">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/20 text-accent">
                     <Sparkles className="h-8 w-8" />
                   </div>
                   <h3 className="mb-3 font-heading text-2xl font-bold text-white">
                     Ecoplate Alumínio
                   </h3>
-                  <p className="text-white/70">
+                  <p className="text-muted-foreground">
                     Liga aeronáutica de alta resistência com até 40% menos peso estrutural. Maior capacidade de carga útil e economia comprovada de combustível.
                   </p>
                 </div>
@@ -241,49 +244,49 @@ const Index = () => {
             </Card>
 
             {/* Card 2 */}
-            <Card className="group relative overflow-hidden rounded-2xl border-steel/40 bg-steel/60 backdrop-blur-sm transition-all hover:border-rodotec-blue/60">
-              <div className="absolute inset-0 bg-gradient-to-br from-rodotec-blue/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Card className="group relative overflow-hidden rounded-2xl border-line bg-surface backdrop-blur-sm transition-all hover:border-accent">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               <div className="relative p-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rodotec-blue/20 text-rodotec-blue">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-accent">
                   <Zap className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 font-heading text-lg font-bold text-white">
                   Robótica de Precisão
                 </h3>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-muted-foreground">
                   Solda robotizada com tolerância milimétrica
                 </p>
               </div>
             </Card>
 
             {/* Card 3 */}
-            <Card className="group relative overflow-hidden rounded-2xl border-steel/40 bg-steel/60 backdrop-blur-sm transition-all hover:border-rodotec-blue/60">
-              <div className="absolute inset-0 bg-gradient-to-br from-rodotec-blue/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Card className="group relative overflow-hidden rounded-2xl border-line bg-surface backdrop-blur-sm transition-all hover:border-accent">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               <div className="relative p-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rodotec-blue/20 text-rodotec-blue">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-accent">
                   <Cpu className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 font-heading text-lg font-bold text-white">
                   Telemetria Avançada
                 </h3>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-muted-foreground">
                   Monitoramento em tempo real de performance
                 </p>
               </div>
             </Card>
 
             {/* Card 4 */}
-            <Card className="group relative overflow-hidden rounded-2xl border-steel/40 bg-steel/60 backdrop-blur-sm transition-all hover:border-rodotec-blue/60 md:col-span-2">
-              <div className="absolute inset-0 bg-gradient-to-br from-tech-gold/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Card className="group relative overflow-hidden rounded-2xl border-line bg-surface backdrop-blur-sm transition-all hover:border-accent md:col-span-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               <div className="relative p-6 flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-tech-gold/20 text-tech-gold">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-success/20 text-success">
                   <Recycle className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="mb-1 font-heading text-lg font-bold text-white">
                     Sustentabilidade Certificada
                   </h3>
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-muted-foreground">
                     100% reciclável com menor pegada de carbono
                   </p>
                 </div>
@@ -292,16 +295,16 @@ const Index = () => {
           </div>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
-            <div className="rounded-2xl border border-steel/20 bg-card p-8 text-center">
-              <div className="mb-2 font-heading text-5xl font-bold text-rodotec-blue">
+            <div className="rounded-2xl border border-line bg-card p-8 text-center">
+              <div className="mb-2 font-heading text-5xl font-bold text-accent">
                 -40%
               </div>
               <p className="text-muted-foreground">
                 Redução média de tara
               </p>
             </div>
-            <div className="rounded-2xl border border-steel/20 bg-card p-8 text-center">
-              <div className="mb-2 font-heading text-5xl font-bold text-tech-gold">
+            <div className="rounded-2xl border border-line bg-card p-8 text-center">
+              <div className="mb-2 font-heading text-5xl font-bold text-warning">
                 15+
               </div>
               <p className="text-muted-foreground">
