@@ -69,7 +69,7 @@ const ProductCard = ({ product, onQuickView, title, image, link }: ProductCardPr
         <h3 className="mb-2 font-heading text-xl font-bold text-foreground">{data?.title || title}</h3>
         {data && (
           <div className="mb-4 text-sm text-muted-foreground">
-            SKU: {data.sku || '—'} • Preço: {data.price ? `R$ ${data.price.toFixed(2)}` : '—'}
+            SKU: {data.sku || '—'}
           </div>
         )}
         <Link to={data ? `/produtos/${data.slug}` : link || "/produtos"}>

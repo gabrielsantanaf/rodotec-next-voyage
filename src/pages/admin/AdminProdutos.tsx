@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { repository } from '@/data/repository';
+import api from '@/services/api';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,14 +32,12 @@ export default function AdminProdutos() {
   const [categoryId, setCategoryId] = useState<string>('');
   const [status, setStatus] = useState<string>('');
   const [availability, setAvailability] = useState<boolean>(false);
-  const [priceMin, setPriceMin] = useState<string>('');
-  const [priceMax, setPriceMax] = useState<string>('');
   const [sort, setSort] = useState<string>('created_desc');
   const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
     loadProducts();
-    setCategories(repository.getCategories());
+    api.categories.list().then(setCategories).catch(() => setCategories([]));
   }, []);
 
   useEffect(() => {
@@ -53,10 +51,15 @@ export default function AdminProdutos() {
     }
   }, [location.state, products]);
 
-  const loadProducts = () => {
-    const data = repository.getProducts();
-    setProducts(data as Product[]);
-    setLoading(false);
+  const loadProducts = async () => {
+    try {
+      const res = await api.products.list();
+      setProducts(res.data as Product[]);
+    } catch (e) {
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredProducts = useMemo(() => {
@@ -76,23 +79,9 @@ export default function AdminProdutos() {
     if (availability) {
       list = list.filter((p) => (p.stock_qty || 0) > 0);
     }
-    const min = priceMin ? parseFloat(priceMin) : null;
-    const max = priceMax ? parseFloat(priceMax) : null;
-    if (min !== null) {
-      list = list.filter((p) => (p.price ?? 0) >= min);
-    }
-    if (max !== null) {
-      list = list.filter((p) => (p.price ?? 0) <= max);
-    }
     switch (sort) {
       case 'name_asc':
         list.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'price_asc':
-        list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-        break;
-      case 'price_desc':
-        list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
         break;
       case 'created_asc':
         list.sort((a, b) => a.created_at.localeCompare(b.created_at));
@@ -103,7 +92,7 @@ export default function AdminProdutos() {
         break;
     }
     return list;
-  }, [products, search, categoryId, status, availability, priceMin, priceMax, sort]);
+  }, [products, search, categoryId, status, availability, sort]);
 
   const perPage = view === 'grid' ? 12 : 20;
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
@@ -164,10 +153,6 @@ export default function AdminProdutos() {
                 <span className="text-sm text-muted-foreground">Em estoque</span>
                 <Switch checked={availability} onCheckedChange={setAvailability} />
               </div>
-              <div className="flex gap-2">
-                <Input placeholder="Preço mín." value={priceMin} onChange={(e) => setPriceMin(e.target.value)} />
-                <Input placeholder="Preço máx." value={priceMax} onChange={(e) => setPriceMax(e.target.value)} />
-              </div>
               <Select value={sort} onValueChange={setSort}>
                 <SelectTrigger>
                   <SelectValue placeholder="Ordenar" />
@@ -176,8 +161,6 @@ export default function AdminProdutos() {
                   <SelectItem value="created_desc">Mais recentes</SelectItem>
                   <SelectItem value="created_asc">Mais antigos</SelectItem>
                   <SelectItem value="name_asc">Nome (A→Z)</SelectItem>
-                  <SelectItem value="price_asc">Preço (↑)</SelectItem>
-                  <SelectItem value="price_desc">Preço (↓)</SelectItem>
                 </SelectContent>
               </Select>
               <div className="flex items-center justify-end gap-2">
@@ -194,7 +177,6 @@ export default function AdminProdutos() {
                 <TableHead>Título</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>SKU</TableHead>
-                <TableHead>Preço</TableHead>
                 <TableHead>Estoque</TableHead>
                 <TableHead>Criado</TableHead>
               </TableRow>
@@ -229,9 +211,6 @@ export default function AdminProdutos() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{product.sku || '—'}</TableCell>
-                    <TableCell>
-                      {product.price ? `R$ ${product.price.toFixed(2)}` : '—'}
-                    </TableCell>
                     <TableCell>{product.stock_qty}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {formatDistanceToNow(new Date(product.created_at), {
@@ -267,9 +246,7 @@ export default function AdminProdutos() {
                           <Badge variant={product.status === 'ACTIVE' ? 'default' : 'secondary'}>
                             {product.status === 'ACTIVE' ? 'Ativo' : 'Rascunho'}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {product.price ? `R$ ${product.price.toFixed(2)}` : '—'}
-                          </span>
+                          
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(product.created_at), { addSuffix: true, locale: ptBR })}

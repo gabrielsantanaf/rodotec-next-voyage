@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import api from '@/services/api';
 import { localAuth } from '@/services/localAuth';
 import type { AdminUser, AdminRole } from '@/types/api';
 
@@ -30,14 +31,20 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const currentUser = await localAuth.getCurrentUser();
+        const currentUser = await api.auth.getCurrentUser();
         setUser(currentUser);
         setRole(currentUser.role);
       } catch (error) {
-        console.error('Error loading user:', error);
-        localStorage.removeItem('auth_token');
-        setUser(null);
-        setRole(null);
+        try {
+          const currentUser = await localAuth.getCurrentUser();
+          setUser(currentUser);
+          setRole(currentUser.role);
+        } catch (err) {
+          console.error('Error loading user:', error);
+          localStorage.removeItem('auth_token');
+          setUser(null);
+          setRole(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -48,10 +55,17 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await localAuth.login({ email, password });
-      setUser(response.user);
-      setRole(response.user.role);
-      return { error: null };
+      try {
+        const response = await api.auth.login({ email, password });
+        setUser(response.user);
+        setRole(response.user.role);
+        return { error: null };
+      } catch (err) {
+        const response = await localAuth.login({ email, password });
+        setUser(response.user);
+        setRole(response.user.role);
+        return { error: null };
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       return { error: { message: error.message || 'Erro ao fazer login' } };
@@ -60,12 +74,14 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = () => {
     try {
-      localAuth.logout();
+      api.auth.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
       setRole(null);
+      localStorage.removeItem('auth_token');
+      localAuth.logout();
     }
   };
 

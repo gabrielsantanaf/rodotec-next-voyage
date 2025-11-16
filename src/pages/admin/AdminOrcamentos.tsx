@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { localDataLayer } from '@/data/localDataLayer';
+import api from '@/services/api';
 import { toast } from 'sonner';
 
 interface Orcamento {
@@ -77,9 +77,9 @@ export default function AdminOrcamentos() {
     filterOrcamentos();
   }, [orcamentos, searchTerm, statusFilter]);
 
-  const loadOrcamentos = () => {
-    const data = localDataLayer.getOrcamentos();
-    setOrcamentos(data);
+  const loadOrcamentos = async () => {
+    const res = await api.quotes.list({ page: 1, per_page: 200 });
+    setOrcamentos(res.data as any);
   };
 
   const filterOrcamentos = () => {
@@ -112,24 +112,24 @@ export default function AdminOrcamentos() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    const updated = localDataLayer.updateOrcamento(id, { status: newStatus });
-    if (updated) {
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      await api.quotes.updateStatus(id, newStatus);
       toast.success('Status atualizado com sucesso!');
       loadOrcamentos();
-    } else {
-      toast.error('Erro ao atualizar status');
+    } catch (e: any) {
+      toast.error(e?.message || 'Erro ao atualizar status');
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este orçamento?')) {
-      const success = localDataLayer.deleteOrcamento(id);
-      if (success) {
+      try {
+        await api.quotes.delete(id);
         toast.success('Orçamento excluído com sucesso!');
         loadOrcamentos();
-      } else {
-        toast.error('Erro ao excluir orçamento');
+      } catch (e: any) {
+        toast.error(e?.message || 'Erro ao excluir orçamento');
       }
     }
   };
@@ -228,7 +228,6 @@ export default function AdminOrcamentos() {
                     <TableHead>Telefone</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Produto</TableHead>
-                    <TableHead>Qtd</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Criado</TableHead>
                     <TableHead>Ações</TableHead>
@@ -243,19 +242,18 @@ export default function AdminOrcamentos() {
                     </TableRow>
                   ) : (
                     currentItems.map((orcamento) => (
-                      <TableRow key={orcamento.id}>
+                      <TableRow key={(orcamento as any)._id || (orcamento as any).id}>
                         <TableCell className="font-medium text-slate-900">
-                          #{orcamento.id.slice(-6)}
+                          #{String((orcamento as any)._id || (orcamento as any).id).slice(-6)}
                         </TableCell>
                         <TableCell className="text-slate-900">{orcamento.nome}</TableCell>
                         <TableCell className="text-slate-900">{orcamento.telefone}</TableCell>
                         <TableCell className="text-slate-900">{orcamento.email}</TableCell>
-                        <TableCell className="text-slate-900">{orcamento.produto}</TableCell>
-                        <TableCell className="text-slate-900">{orcamento.quantidade}</TableCell>
+                        <TableCell className="text-slate-900">{(orcamento as any).produto?.nome || (orcamento as any).produto || '—'}</TableCell>
                         <TableCell>
                           <Select
                             value={orcamento.status}
-                            onValueChange={(value) => handleStatusChange(orcamento.id, value)}
+                            onValueChange={(value) => handleStatusChange(String((orcamento as any)._id || (orcamento as any).id), value)}
                           >
                             <SelectTrigger className="w-32 h-8 text-xs">
                               <SelectValue />
@@ -268,7 +266,7 @@ export default function AdminOrcamentos() {
                           </Select>
                         </TableCell>
                         <TableCell className="text-slate-600 text-sm">
-                          {formatDistanceToNow(new Date(orcamento.criadoEm), {
+                          {formatDistanceToNow(new Date((orcamento as any).createdAt || (orcamento as any).criadoEm), {
                             addSuffix: true,
                             locale: ptBR,
                           })}
@@ -300,7 +298,7 @@ export default function AdminOrcamentos() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(orcamento.id)}
+                              onClick={() => handleDelete(String((orcamento as any)._id || (orcamento as any).id))}
                               className="h-8 px-2 text-danger hover:text-danger/90"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -369,11 +367,7 @@ export default function AdminOrcamentos() {
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Produto</Label>
-                    <p className="text-[#0B1220]">{selectedOrcamento.produto}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Quantidade</Label>
-                    <p className="text-[#0B1220]">{selectedOrcamento.quantidade}</p>
+                    <p className="text-[#0B1220]">{(selectedOrcamento as any).produto?.nome || (selectedOrcamento as any).produto || '—'}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Status</Label>
@@ -384,15 +378,17 @@ export default function AdminOrcamentos() {
                   <Label className="text-sm font-medium text-gray-700">Mensagem</Label>
                   <p className="text-[#0B1220] bg-gray-50 p-3 rounded-md">{selectedOrcamento.mensagem}</p>
                 </div>
-                {selectedOrcamento.notasInternas && (
+                {(selectedOrcamento as any).observacoes && (
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Notas Internas</Label>
-                    <p className="text-[#0B1220] bg-blue-50 p-3 rounded-md">{selectedOrcamento.notasInternas}</p>
+                    <p className="text-[#0B1220] bg-blue-50 p-3 rounded-md">{(selectedOrcamento as any).observacoes}</p>
                   </div>
                 )}
                 <div className="text-sm text-gray-500">
-                  <p>Criado em: {format(new Date(selectedOrcamento.criadoEm), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
-                  <p>Atualizado em: {format(new Date(selectedOrcamento.atualizadoEm), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                  <p>Criado em: {format(new Date((selectedOrcamento as any).createdAt || (selectedOrcamento as any).criadoEm), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                  {(selectedOrcamento as any).updatedAt && (
+                    <p>Atualizado em: {format(new Date((selectedOrcamento as any).updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -415,28 +411,27 @@ export default function AdminOrcamentos() {
             </DialogHeader>
             {selectedOrcamento && (
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
-                  const updated = localDataLayer.updateOrcamento(selectedOrcamento.id, {
-                    notasInternas: formData.get('notasInternas') as string,
-                  });
-                  if (updated) {
+                  const observacoes = String(formData.get('observacoes') || '');
+                  try {
+                    await api.quotes.updateObservacoes(String((selectedOrcamento as any)._id || (selectedOrcamento as any).id), observacoes);
                     toast.success('Orçamento atualizado com sucesso!');
-                    loadOrcamentos();
+                    await loadOrcamentos();
                     setIsEditModalOpen(false);
-                  } else {
-                    toast.error('Erro ao atualizar orçamento');
+                  } catch (err: any) {
+                    toast.error(err?.message || 'Erro ao atualizar orçamento');
                   }
                 }}
                 className="space-y-4"
               >
                 <div>
-                  <Label htmlFor="notasInternas">Notas Internas</Label>
+                  <Label htmlFor="observacoes">Notas Internas</Label>
                   <Textarea
-                    id="notasInternas"
-                    name="notasInternas"
-                    defaultValue={selectedOrcamento.notasInternas}
+                    id="observacoes"
+                    name="observacoes"
+                    defaultValue={(selectedOrcamento as any).observacoes}
                     rows={4}
                     className="border-gray-300"
                   />

@@ -28,16 +28,17 @@ export class ApiError extends Error {
 }
 
 // Helper para fazer requisições
-async function fetchApi<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('auth_token');
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (!isFormData) {
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -71,9 +72,10 @@ async function fetchApi<T>(
 
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
+    const payload = { email: credentials.email, senha: credentials.password };
     const response = await fetchApi<ApiResponse<LoginResponse>>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: JSON.stringify(payload),
     });
 
     // Salvar token no localStorage
@@ -213,34 +215,35 @@ export const productsApi = {
     }
   },
 
-  create: async (data: Partial<Product>): Promise<Product> => {
+  create: async (data: FormData | Partial<Product>): Promise<Product> => {
+    const isFD = typeof FormData !== 'undefined' && data instanceof FormData;
     try {
       const response = await fetchApi<ApiResponse<Product>>('/products', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: isFD ? (data as FormData) : JSON.stringify(data),
       });
       return response.data;
     } catch (error) {
       console.warn('API indisponível, usando stub local para criar produto:', error);
-      const insertRes = await supabase.from('products').insert([data]);
+      const insertRes = await supabase.from('products').insert([data as Partial<Product>]);
       if (insertRes.error) throw new ApiError(insertRes.error.message);
       const created = Array.isArray(insertRes.data) ? insertRes.data[0] : insertRes.data;
       return created as Product;
     }
   },
 
-  update: async (id: string, data: Partial<Product>): Promise<Product> => {
+  update: async (id: string, data: FormData | Partial<Product>): Promise<Product> => {
+    const isFD = typeof FormData !== 'undefined' && data instanceof FormData;
     try {
       const response = await fetchApi<ApiResponse<Product>>(`/products/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(data),
+        body: isFD ? (data as FormData) : JSON.stringify(data),
       });
       return response.data;
     } catch (error) {
       console.warn('API indisponível, usando stub local para atualizar produto:', error);
-      const updateRes = await supabase.from('products').update(data).eq('id', id);
+      const updateRes = await supabase.from('products').update(data as Partial<Product>).eq('id', id);
       if (updateRes.error) throw new ApiError(updateRes.error.message);
-      // Buscar registro atualizado
       const { data: updated, error: supaErr } = await supabase
         .from('products')
         .select('*')
@@ -290,6 +293,49 @@ export const quotesApi = {
       body: JSON.stringify(data),
     });
     return response.data;
+  },
+
+  updateStatus: async (id: string, status: string): Promise<QuoteRequest> => {
+    const response = await fetchApi<ApiResponse<QuoteRequest>>(`/quotes/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+    return response.data;
+  },
+
+  updateObservacoes: async (id: string, observacoes: string): Promise<QuoteRequest> => {
+    const response = await fetchApi<ApiResponse<QuoteRequest>>(`/quotes/${id}/observacoes`, {
+      method: 'PATCH',
+      body: JSON.stringify({ observacoes }),
+    });
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await fetchApi(`/quotes/${id}`, { method: 'DELETE' });
+  },
+
+  createPublic: async (data: {
+    nome: string;
+    email: string;
+    telefone: string;
+    produto: string; // MongoID do produto
+    mensagem?: string;
+    consent_lgpd?: boolean;
+  }): Promise<QuoteRequest> => {
+    const payload: any = {
+      nome: data.nome,
+      email: data.email,
+      telefone: data.telefone,
+      produto: data.produto,
+      mensagem: data.mensagem,
+    };
+    const response = await fetchApi<any>('/quotes', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    // Backend usa { sucesso, dados }
+    return (response.data || response.dados) as QuoteRequest;
   },
 
   exportCSV: async (filters?: QuoteFilters): Promise<Blob> => {

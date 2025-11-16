@@ -19,8 +19,6 @@ const Produtos = () => {
   const [view, setView] = useState<'grid' | 'list'>("grid");
   const [categoryId, setCategoryId] = useState<string>("");
   const [availability, setAvailability] = useState<boolean>(false);
-  const [priceMin, setPriceMin] = useState<string>("");
-  const [priceMax, setPriceMax] = useState<string>("");
   const [sort, setSort] = useState<string>("created_desc");
   const [page, setPage] = useState<number>(1);
   const [quickView, setQuickView] = useState<Product | null>(null);
@@ -44,19 +42,9 @@ const Produtos = () => {
     if (availability) {
       list = list.filter((p) => (p.stock_qty || 0) > 0);
     }
-    const min = priceMin ? parseFloat(priceMin) : null;
-    const max = priceMax ? parseFloat(priceMax) : null;
-    if (min !== null) list = list.filter((p) => (p.price ?? 0) >= min);
-    if (max !== null) list = list.filter((p) => (p.price ?? 0) <= max);
     switch (sort) {
       case 'name_asc':
         list.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'price_asc':
-        list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-        break;
-      case 'price_desc':
-        list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
         break;
       case 'created_asc':
         list.sort((a, b) => a.created_at.localeCompare(b.created_at));
@@ -67,7 +55,7 @@ const Produtos = () => {
         break;
     }
     return list;
-  }, [products, search, categoryId, availability, priceMin, priceMax, sort]);
+  }, [products, search, categoryId, availability, sort]);
 
   const perPage = view === 'grid' ? 12 : 20;
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
@@ -164,10 +152,6 @@ const Produtos = () => {
                   <span className="text-sm text-muted-foreground">Em estoque</span>
                   <Switch checked={availability} onCheckedChange={setAvailability} />
                 </div>
-                <div className="flex gap-2">
-                  <Input placeholder="Preço mín." value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className="w-28" />
-                  <Input placeholder="Preço máx." value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className="w-28" />
-                </div>
                 <Select value={sort} onValueChange={setSort}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="Ordenar" />
@@ -176,8 +160,6 @@ const Produtos = () => {
                     <SelectItem value="created_desc">Mais recentes</SelectItem>
                     <SelectItem value="created_asc">Mais antigos</SelectItem>
                     <SelectItem value="name_asc">Nome (A→Z)</SelectItem>
-                    <SelectItem value="price_asc">Preço (↑)</SelectItem>
-                    <SelectItem value="price_desc">Preço (↓)</SelectItem>
                   </SelectContent>
                 </Select>
                 <div className="flex items-center gap-2">
@@ -215,7 +197,6 @@ const Produtos = () => {
                       <div className="flex-1">
                         <h3 className="font-heading font-bold">{product.title}</h3>
                         <p className="text-sm text-muted-foreground">SKU: {product.sku || '—'}</p>
-                        <p className="text-sm text-muted-foreground">Preço: {product.price ? `R$ ${product.price.toFixed(2)}` : '—'}</p>
                       </div>
                       <div className="flex gap-2">
                         <Link to={`/produtos/${product.slug}`} className="text-sm underline">Ver detalhes</Link>
@@ -264,7 +245,6 @@ const Produtos = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">SKU: {quickView.sku || '—'}</p>
-                    <p className="text-sm text-muted-foreground">Preço: {quickView.price ? `R$ ${quickView.price.toFixed(2)}` : '—'}</p>
                     <Link to={`/produtos/${quickView.slug}`} className="text-sm underline">Ver detalhes</Link>
                   </div>
                 </div>

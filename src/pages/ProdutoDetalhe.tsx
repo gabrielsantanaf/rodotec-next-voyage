@@ -1,16 +1,43 @@
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronRight, Download, FileText, Shield, Zap, Award, MessageCircle, Mail } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SideNav from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import api from "@/services/api";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { repository } from "@/data/repository";
 
 const ProdutoDetalhe = () => {
   const { slug } = useParams();
-  const product = repository.getProducts().find(p => p.slug === slug);
+  const [product, setProduct] = useState<any>(null);
+  const [backendProductId, setBackendProductId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Carregar produto do backend por busca (slug ou título)
+    const term = (slug || '').replace(/-/g, ' ');
+    api.products.list({ search: term }).then((res) => {
+      const first = (res.data || [])[0];
+      if (first) {
+        setProduct({
+          title: (first as any).nome || first.title,
+          sku: (first as any).sku || first.sku,
+          images: (first as any).imagensUrls?.map((i: any) => i.url) || [],
+          short_description: (first as any).descricao || first.description,
+          technical_specs: (first as any).especificacoes || {},
+        });
+        setBackendProductId(((first as any)._id || (first as any).id) as string);
+      }
+    }).catch(() => {
+      setProduct(null);
+      setBackendProductId(null);
+    });
+  }, [slug]);
   const specifications = [
     { label: "Comprimento", value: "7,50 m" },
     { label: "Largura", value: "2,60 m" },
@@ -127,9 +154,6 @@ const ProdutoDetalhe = () => {
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row">
-                <Button size="lg" className="btn-hero flex-1">
-                  Pedir Orçamento
-                </Button>
                 <Button size="lg" variant="outline" className="flex-1">
                   <Download className="mr-2 h-5 w-5" />
                   Baixar Ficha Técnica
@@ -165,6 +189,87 @@ const ProdutoDetalhe = () => {
                 </Card>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Solicitar Orçamento */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="mb-8 font-heading text-3xl font-bold text-foreground">Solicitar Orçamento</h2>
+            <Card className="border-steel/20">
+              <CardContent className="p-6 space-y-4">
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget as HTMLFormElement);
+                    const nome = String(formData.get('nome') || '').trim();
+                    const email = String(formData.get('email') || '').trim();
+                    const telefone = String(formData.get('telefone') || '').trim();
+                    const mensagem = String(formData.get('mensagem') || '').trim();
+
+                    if (!nome || !email || !telefone) {
+                      toast.error('Preencha nome, e-mail e telefone');
+                      return;
+                    }
+
+                    try {
+                      if (!backendProductId) {
+                        toast.error('Produto não encontrado na base para vincular ao orçamento');
+                        return;
+                      }
+                      if (!mensagem || mensagem.length < 10) {
+                        toast.error('Mensagem deve ter pelo menos 10 caracteres');
+                        return;
+                      }
+                      await api.quotes.createPublic({
+                        nome,
+                        email,
+                        telefone,
+                        mensagem,
+                        produto: backendProductId,
+                        consent_lgpd: true,
+                      });
+                      toast.success('Solicitação enviada!');
+                      (e.currentTarget as HTMLFormElement).reset();
+                    } catch (err: any) {
+                      const msg = err?.message || err?.mensagem || 'Erro ao enviar orçamento';
+                      toast.error(msg);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="nome">Nome *</Label>
+                      <Input id="nome" name="nome" placeholder="Seu nome" />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">E-mail *</Label>
+                      <Input id="email" name="email" type="email" placeholder="seu@email.com" />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="telefone">Telefone/WhatsApp *</Label>
+                      <Input id="telefone" name="telefone" placeholder="(00) 00000-0000" />
+                    </div>
+                    <div>
+                      <Label>Produto</Label>
+                      <Input value={product?.title || ''} readOnly />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="mensagem">Mensagem</Label>
+                    <Textarea id="mensagem" name="mensagem" rows={4} placeholder="Descreva sua necessidade" />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button type="submit">Enviar Solicitação</Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

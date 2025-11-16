@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { repository, slugify } from '@/data/repository';
+import { slugify } from '@/data/repository';
+import api from '@/services/api';
 import type { Product } from '@/data/types';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -153,7 +154,7 @@ export default function AdminProdutoEditor() {
     setSpecs(newSpecs);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validations
     if (!formData.title?.trim() || formData.title.length < 3) {
       toast.error('O nome do produto deve ter pelo menos 3 caracteres');
@@ -184,13 +185,36 @@ export default function AdminProdutoEditor() {
         technical_specs,
       };
 
+      const toFormData = async (): Promise<FormData> => {
+        const fd = new FormData();
+        fd.append('nome', formData.title || '');
+        fd.append('descricao', formData.description || '');
+        if (formData.price != null) fd.append('preco', String(formData.price));
+        fd.append('categoria', formData.category_id || '');
+        fd.append('estoque', String(formData.stock_qty || 0));
+        if (formData.sku) fd.append('sku', formData.sku);
+        for (const img of formData.images || []) {
+          try {
+            const res = await fetch(img);
+            const blob = await res.blob();
+            fd.append('imagens', blob, `imagem-${Date.now()}.png`);
+          } catch {}
+        }
+        // Especificações
+        const specObj: Record<string, string> = {};
+        specs.forEach((s) => { if (s.key.trim()) specObj[s.key.trim()] = s.value.trim(); });
+        fd.append('especificacoes', JSON.stringify(specObj));
+        return fd;
+      };
+
       if (isEditing && id) {
-        repository.updateProduct(id, productData);
+        await api.products.update(id, await toFormData());
         toast.success('Produto atualizado com sucesso');
       } else {
-        const created = repository.createProduct(productData);
+        const created = await api.products.create(await toFormData());
         toast.success('Produto criado com sucesso');
-        navigate('/admin/produtos', { state: { createdId: created.id } });
+        const createdId = (created as any)._id || (created as any).id;
+        navigate('/admin/produtos', { state: { createdId } });
       }
     } catch (error: any) {
       console.error('Error saving product:', error);

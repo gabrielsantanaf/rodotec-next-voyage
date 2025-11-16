@@ -21,6 +21,7 @@ import AdminOrcamentoDetalhe from "./pages/admin/AdminOrcamentoDetalhe";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminProdutos from "./pages/admin/AdminProdutos";
 import AdminProdutoEditor from "./pages/admin/AdminProdutoEditor";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AdminAuthProvider>
+          <ErrorBoundary>
           <Routes>
             {/* Rotas públicas */}
             <Route path="/" element={<Index />} />
@@ -107,6 +109,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </ErrorBoundary>
         </AdminAuthProvider>
       </BrowserRouter>
     </TooltipProvider>
