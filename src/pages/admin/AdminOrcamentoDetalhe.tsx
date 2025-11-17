@@ -1,51 +1,45 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import api from '@/services/api';
+import type { QuoteRequest } from '@/types/api';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, Save, ExternalLink, Mail, Phone, Building, Package, FileText, CheckCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  ChevronLeft,
+  Save,
+  ExternalLink,
+  Mail,
+  Phone,
+  Building,
+  Package,
+  FileText,
+  CheckCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-type QuoteRequest = {
-  id: string;
-  name: string;
-  company: string | null;
-  email: string;
-  phone: string;
-  product_id: string | null;
-  product_name: string;
-  message: string | null;
-  consent_lgpd: boolean | null;
-  status: string;
-  assignee: string | null;
-  notes: string | null;
-  source: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
 const statusLabels: Record<string, string> = {
-  NEW: 'Novo',
-  IN_PROGRESS: 'Em andamento',
-  CONTACTED: 'Contatado',
-  WON: 'Ganho',
-  LOST: 'Perdido',
+  novo: 'Novo',
+  em_contato: 'Em Contato',
+  concluido: 'Concluído',
 };
 
 const statusColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  NEW: 'default',
-  IN_PROGRESS: 'secondary',
-  CONTACTED: 'outline',
-  WON: 'default',
-  LOST: 'destructive',
+  novo: 'default',
+  em_contato: 'secondary',
+  concluido: 'outline',
 };
 
 export default function AdminOrcamentoDetalhe() {
@@ -56,9 +50,8 @@ export default function AdminOrcamentoDetalhe() {
   const [saving, setSaving] = useState(false);
   const [quote, setQuote] = useState<QuoteRequest | null>(null);
 
-  const [status, setStatus] = useState('');
-  const [assignee, setAssignee] = useState('');
-  const [notes, setNotes] = useState('');
+  const [status, setStatus] = useState<'novo' | 'em_contato' | 'concluido'>('novo');
+  const [observacoes, setObservacoes] = useState('');
 
   useEffect(() => {
     loadQuote();
@@ -67,23 +60,17 @@ export default function AdminOrcamentoDetalhe() {
   const loadQuote = async () => {
     if (!id) return;
 
-    const { data, error } = await supabase
-      .from('quote_requests')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
+    try {
+      const data = await api.quotes.get(id);
+      setQuote(data);
+      setStatus(data.status);
+      setObservacoes(data.observacoes || '');
+      setLoading(false);
+    } catch (error: any) {
       console.error('Error loading quote:', error);
       toast.error('Erro ao carregar orçamento');
       navigate('/admin/orcamentos');
-    } else {
-      setQuote(data);
-      setStatus(data.status);
-      setAssignee(data.assignee || '');
-      setNotes(data.notes || '');
     }
-    setLoading(false);
   };
 
   const handleSave = async () => {
@@ -92,16 +79,13 @@ export default function AdminOrcamentoDetalhe() {
     setSaving(true);
 
     try {
-      const { error } = await supabase
-        .from('quote_requests')
-        .update({
-          status,
-          assignee: assignee || null,
-          notes: notes || null,
-        })
-        .eq('id', id);
+      // Atualizar status
+      await api.quotes.updateStatus(id, status);
 
-      if (error) throw error;
+      // Atualizar observações
+      if (observacoes !== (quote?.observacoes || '')) {
+        await api.quotes.updateObservacoes(id, observacoes);
+      }
 
       toast.success('Orçamento atualizado com sucesso');
       loadQuote();
@@ -133,7 +117,8 @@ export default function AdminOrcamentoDetalhe() {
     );
   }
 
-  const hasChanges = status !== quote.status || assignee !== (quote.assignee || '') || notes !== (quote.notes || '');
+  const hasChanges =
+    status !== quote.status || observacoes !== (quote.observacoes || '');
 
   return (
     <AdminLayout>
@@ -145,9 +130,9 @@ export default function AdminOrcamentoDetalhe() {
             </Button>
           </Link>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">Orçamento #{quote.id.slice(0, 8)}</h1>
+            <h1 className="text-2xl font-bold">Orçamento #{quote._id.slice(-6)}</h1>
             <p className="text-sm text-muted-foreground">
-              Criado em {format(new Date(quote.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+              Criado em {format(new Date(quote.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
             </p>
           </div>
           <Button onClick={handleSave} disabled={saving || !hasChanges}>
@@ -170,15 +155,17 @@ export default function AdminOrcamentoDetalhe() {
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       Nome
                     </div>
-                    <p>{quote.name}</p>
+                    <p>{quote.nome}</p>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 text-sm font-medium mb-1">
-                      <Building className="h-4 w-4 text-muted-foreground" />
-                      Empresa
+                  {quote.empresa && (
+                    <div>
+                      <div className="flex items-center gap-2 text-sm font-medium mb-1">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        Empresa
+                      </div>
+                      <p>{quote.empresa}</p>
                     </div>
-                    <p>{quote.company || '—'}</p>
-                  </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -196,8 +183,8 @@ export default function AdminOrcamentoDetalhe() {
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       Telefone
                     </div>
-                    <a href={`tel:${quote.phone}`} className="text-primary hover:underline">
-                      {quote.phone}
+                    <a href={`tel:${quote.telefone}`} className="text-primary hover:underline">
+                      {quote.telefone}
                     </a>
                   </div>
                 </div>
@@ -211,9 +198,11 @@ export default function AdminOrcamentoDetalhe() {
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Package className="h-5 w-5 text-muted-foreground" />
-                  <p className="font-medium">{quote.product_name}</p>
-                  {quote.product_id && (
-                    <Link to={`/admin/produtos/${quote.product_id}`} className="ml-auto">
+                  <p className="font-medium">
+                    {typeof quote.produto === 'object' ? quote.produto.nome : quote.produto}
+                  </p>
+                  {typeof quote.produto === 'object' && quote.produto._id && (
+                    <Link to={`/admin/produtos/${quote.produto._id}`} className="ml-auto">
                       <Button variant="ghost" size="sm">
                         Ver produto <ExternalLink className="h-3 w-3 ml-1" />
                       </Button>
@@ -223,13 +212,13 @@ export default function AdminOrcamentoDetalhe() {
               </CardContent>
             </Card>
 
-            {quote.message && (
+            {quote.mensagem && (
               <Card>
                 <CardHeader>
                   <CardTitle>Mensagem</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="whitespace-pre-wrap">{quote.message}</p>
+                  <p className="whitespace-pre-wrap">{quote.mensagem}</p>
                 </CardContent>
               </Card>
             )}
@@ -240,8 +229,8 @@ export default function AdminOrcamentoDetalhe() {
               </CardHeader>
               <CardContent>
                 <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  value={observacoes}
+                  onChange={(e) => setObservacoes(e.target.value)}
                   placeholder="Adicione observações internas sobre este orçamento..."
                   rows={6}
                 />
@@ -264,13 +253,14 @@ export default function AdminOrcamentoDetalhe() {
                     <div className="flex-1 pb-4">
                       <p className="font-medium">Orçamento criado</p>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(quote.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        {format(new Date(quote.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                          locale: ptBR,
+                        })}
                       </p>
-                      <p className="text-sm text-muted-foreground">Origem: {quote.source || 'Formulário do site'}</p>
                     </div>
                   </div>
 
-                  {quote.updated_at !== quote.created_at && (
+                  {quote.updatedAt && quote.updatedAt !== quote.createdAt && (
                     <div className="flex gap-3">
                       <div className="flex flex-col items-center">
                         <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -280,7 +270,9 @@ export default function AdminOrcamentoDetalhe() {
                       <div className="flex-1">
                         <p className="font-medium">Última atualização</p>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(quote.updated_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          {format(new Date(quote.updatedAt), "dd/MM/yyyy 'às' HH:mm", {
+                            locale: ptBR,
+                          })}
                         </p>
                       </div>
                     </div>
@@ -297,39 +289,18 @@ export default function AdminOrcamentoDetalhe() {
                 <CardTitle>Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <Select value={status} onValueChange={setStatus}>
+                <Select value={status} onValueChange={(value: any) => setStatus(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="NEW">Novo</SelectItem>
-                    <SelectItem value="IN_PROGRESS">Em andamento</SelectItem>
-                    <SelectItem value="CONTACTED">Contatado</SelectItem>
-                    <SelectItem value="WON">Ganho</SelectItem>
-                    <SelectItem value="LOST">Perdido</SelectItem>
+                    <SelectItem value="novo">Novo</SelectItem>
+                    <SelectItem value="em_contato">Em Contato</SelectItem>
+                    <SelectItem value="concluido">Concluído</SelectItem>
                   </SelectContent>
                 </Select>
                 <div className="mt-3">
-                  <Badge variant={statusColors[status]}>
-                    {statusLabels[status]}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Responsável</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="assignee">Atribuir para</Label>
-                  <Input
-                    id="assignee"
-                    value={assignee}
-                    onChange={(e) => setAssignee(e.target.value)}
-                    placeholder="Nome do responsável"
-                  />
+                  <Badge variant={statusColors[status]}>{statusLabels[status]}</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -339,15 +310,15 @@ export default function AdminOrcamentoDetalhe() {
                 <CardTitle>Informações adicionais</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {quote.empresa && (
+                  <div>
+                    <p className="text-sm font-medium">Empresa</p>
+                    <p className="text-sm text-muted-foreground">{quote.empresa}</p>
+                  </div>
+                )}
                 <div>
-                  <p className="text-sm font-medium">Consentimento LGPD</p>
-                  <p className="text-sm text-muted-foreground">
-                    {quote.consent_lgpd ? 'Sim, aceito' : 'Não informado'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Origem</p>
-                  <p className="text-sm text-muted-foreground">{quote.source || 'Formulário do site'}</p>
+                  <p className="text-sm font-medium">ID do Orçamento</p>
+                  <p className="text-sm text-muted-foreground font-mono">{quote._id}</p>
                 </div>
               </CardContent>
             </Card>

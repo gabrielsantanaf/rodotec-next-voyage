@@ -1,54 +1,86 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronRight, MapPin, Phone, Mail, Send } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronRight, MapPin, Phone, Mail, Send } from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
+import api from '@/services/api';
+import type { Product } from '@/types/api';
+import { toast } from 'sonner';
 
 const Contato = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     company: '',
     email: '',
     phone: '',
-    productName: 'Outro',
+    productId: '',
     message: '',
     consentLGPD: false,
   });
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      const res = await api.products.list({ ativo: true, limit: 100 });
+      setProducts(res.dados || []);
+    } catch (e) {
+      console.error('Erro ao carregar produtos:', e);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('quote_requests')
-        .insert([
-          {
-            name: formData.name,
-            company: formData.company || null,
-            email: formData.email,
-            phone: formData.phone,
-            product_name: formData.productName,
-            message: formData.message,
-            consent_lgpd: formData.consentLGPD,
-            status: 'NEW',
-            source: 'SITE_FORM',
-          },
-        ]);
+      // Validação básica
+      if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+        toast.error('Por favor, preencha todos os campos obrigatórios');
+        setIsSubmitting(false);
+        return;
+      }
 
-      if (error) throw error;
+      if (!formData.productId) {
+        toast.error('Por favor, selecione um produto de interesse');
+        setIsSubmitting(false);
+        return;
+      }
 
-      toast.success("Solicitação enviada com sucesso!", {
-        description: "Retornaremos em breve. Obrigado pelo contato.",
+      if (!formData.consentLGPD) {
+        toast.error('É necessário aceitar a Política de Privacidade');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Enviar para API
+      await api.quotes.create({
+        nome: formData.name,
+        telefone: formData.phone,
+        email: formData.email,
+        empresa: formData.company || undefined,
+        produto: formData.productId,
+        mensagem: formData.message,
+      });
+
+      toast.success('Solicitação enviada com sucesso!', {
+        description: 'Retornaremos em breve. Obrigado pelo contato.',
       });
 
       // Reset form
@@ -57,7 +89,7 @@ const Contato = () => {
         company: '',
         email: '',
         phone: '',
-        productName: 'Outro',
+        productId: '',
         message: '',
         consentLGPD: false,
       });
@@ -66,8 +98,8 @@ const Contato = () => {
       (e.target as HTMLFormElement).reset();
     } catch (error: any) {
       console.error('Error submitting quote request:', error);
-      toast.error("Erro ao enviar solicitação", {
-        description: "Por favor, tente novamente mais tarde.",
+      toast.error('Erro ao enviar solicitação', {
+        description: error?.message || 'Por favor, tente novamente mais tarde.',
       });
     } finally {
       setIsSubmitting(false);
@@ -82,7 +114,9 @@ const Contato = () => {
       <section className="border-b border-steel/20 bg-steel/5 py-4">
         <div className="container mx-auto px-4">
           <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">Home</Link>
+            <Link to="/" className="hover:text-foreground">
+              Home
+            </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-foreground">Contato</span>
           </nav>
@@ -109,12 +143,12 @@ const Contato = () => {
               <Card className="border-steel/20">
                 <CardContent className="p-6">
                   <MapPin className="mb-4 h-8 w-8 text-rodotec-blue" />
-                  <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
-                    Endereço
-                  </h3>
+                  <h3 className="mb-2 font-heading text-lg font-bold text-foreground">Endereço</h3>
                   <p className="text-muted-foreground">
-                    Av. Industrial, 1500<br />
-                    Distrito Industrial<br />
+                    Av. Industrial, 1500
+                    <br />
+                    Distrito Industrial
+                    <br />
                     São Paulo, SP - CEP 01000-000
                   </p>
                 </CardContent>
@@ -123,12 +157,12 @@ const Contato = () => {
               <Card className="border-steel/20">
                 <CardContent className="p-6">
                   <Phone className="mb-4 h-8 w-8 text-rodotec-blue" />
-                  <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
-                    Telefone
-                  </h3>
+                  <h3 className="mb-2 font-heading text-lg font-bold text-foreground">Telefone</h3>
                   <p className="text-muted-foreground">
-                    (11) 3000-0000<br />
-                    (11) 98000-0000<br />
+                    (11) 3000-0000
+                    <br />
+                    (11) 98000-0000
+                    <br />
                     Segunda a Sexta, 8h às 18h
                   </p>
                 </CardContent>
@@ -137,12 +171,12 @@ const Contato = () => {
               <Card className="border-steel/20">
                 <CardContent className="p-6">
                   <Mail className="mb-4 h-8 w-8 text-rodotec-blue" />
-                  <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
-                    E-mail
-                  </h3>
+                  <h3 className="mb-2 font-heading text-lg font-bold text-foreground">E-mail</h3>
                   <p className="text-muted-foreground">
-                    contato@rodotec.com.br<br />
-                    vendas@rodotec.com.br<br />
+                    contato@rodotec.com.br
+                    <br />
+                    vendas@rodotec.com.br
+                    <br />
                     suporte@rodotec.com.br
                   </p>
                 </CardContent>
@@ -156,7 +190,7 @@ const Contato = () => {
                   <h2 className="mb-6 font-heading text-2xl font-bold text-foreground">
                     Solicitar Orçamento
                   </h2>
-                  
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-2">
@@ -212,18 +246,26 @@ const Contato = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product">Produto de Interesse</Label>
-                      <Select value={formData.productName} onValueChange={(value) => setFormData({ ...formData, productName: value })}>
+                      <Label htmlFor="product">Produto de Interesse *</Label>
+                      <Select
+                        value={formData.productId}
+                        onValueChange={(value) => setFormData({ ...formData, productId: value })}
+                      >
                         <SelectTrigger className="border-steel/20">
                           <SelectValue placeholder="Selecione um produto" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Carroceria Baú">Carroceria Baú</SelectItem>
-                          <SelectItem value="Reboque Frigorífico">Reboque Frigorífico</SelectItem>
-                          <SelectItem value="Carroceria Graneleira">Carroceria Graneleira</SelectItem>
-                          <SelectItem value="Carroceria Sider">Carroceria Sider</SelectItem>
-                          <SelectItem value="Implemento Especial">Implemento Especial</SelectItem>
-                          <SelectItem value="Outro">Outro</SelectItem>
+                          {products.length === 0 ? (
+                            <SelectItem value="none" disabled>
+                              Carregando produtos...
+                            </SelectItem>
+                          ) : (
+                            products.map((product) => (
+                              <SelectItem key={product._id} value={product._id}>
+                                {product.nome}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -247,14 +289,16 @@ const Contato = () => {
                         id="terms"
                         required
                         checked={formData.consentLGPD}
-                        onChange={(e) => setFormData({ ...formData, consentLGPD: e.target.checked })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, consentLGPD: e.target.checked })
+                        }
                         className="mt-1 h-4 w-4 rounded border-steel/20"
                       />
                       <Label htmlFor="terms" className="text-sm text-muted-foreground">
-                        Concordo com a{" "}
+                        Concordo com a{' '}
                         <a href="#" className="text-rodotec-blue hover:underline">
                           Política de Privacidade
-                        </a>{" "}
+                        </a>{' '}
                         e autorizo o contato da RODOTEC
                       </Label>
                     </div>
@@ -266,7 +310,7 @@ const Contato = () => {
                       className="btn-hero w-full"
                     >
                       {isSubmitting ? (
-                        "Enviando..."
+                        'Enviando...'
                       ) : (
                         <>
                           Enviar Mensagem
