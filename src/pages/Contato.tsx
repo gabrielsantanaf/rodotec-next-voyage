@@ -69,8 +69,8 @@ const Contato = () => {
         return;
       }
 
-      // Enviar para API
-      await api.quotes.create({
+      // Enviar para API (público, sem token)
+      await api.quotes.createPublic({
         nome: formData.name,
         telefone: formData.phone,
         email: formData.email,

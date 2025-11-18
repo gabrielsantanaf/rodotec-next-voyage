@@ -278,17 +278,27 @@ export default function AdminProdutos() {
                   >
                     <CardContent className="p-0">
                       <div className="aspect-video w-full bg-muted overflow-hidden">
-                        {product.imagemPrincipal ? (
-                          <img
-                            src={product.imagemPrincipal}
-                            alt={product.nome}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                            Sem imagem
-                          </div>
-                        )}
+                        {(() => {
+                          const imgUrl = typeof product.imagemPrincipal === 'string' 
+                            ? product.imagemPrincipal 
+                            : product.imagemPrincipal?.url || 
+                              (product.imagensUrls?.[0] 
+                                ? (typeof product.imagensUrls[0] === 'string' 
+                                  ? product.imagensUrls[0] 
+                                  : product.imagensUrls[0].url || product.imagensUrls[0])
+                                : null);
+                          return imgUrl ? (
+                            <img
+                              src={imgUrl}
+                              alt={product.nome}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                              Sem imagem
+                            </div>
+                          );
+                        })()}
                       </div>
                       <div className="p-4 space-y-2">
                         <Link

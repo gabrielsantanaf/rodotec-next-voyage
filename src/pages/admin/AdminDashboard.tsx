@@ -49,15 +49,30 @@ export default function AdminDashboard() {
 
       // Carrega estatísticas de orçamentos
       const statsData = await api.quotes.getStats();
-      setStats(statsData);
+      
+      // Buscar contagem de produtos ativos e inativos
+      const [activeProductsRes, inactiveProductsRes] = await Promise.all([
+        api.products.list({ ativo: true, limit: 1 }).catch(() => ({ dados: [] })),
+        api.products.list({ ativo: false, limit: 1 }).catch(() => ({ dados: [] })),
+      ]);
+
+      // Backend retorna { total, novos, emContato, concluidos, ultimoMes, taxaConclusao, ... }
+      setStats({
+        novos: statsData.novos || 0,
+        emContato: statsData.emContato || 0,
+        concluidos: statsData.concluidos || 0,
+        active_products: activeProductsRes.paginacao?.total || activeProductsRes.dados?.length || 0,
+        draft_products: inactiveProductsRes.paginacao?.total || inactiveProductsRes.dados?.length || 0,
+        taxaConclusao: statsData.taxaConclusao,
+      });
 
       // Carrega orçamentos recentes
       const quotesData = await api.dashboard.getRecentQuotes(5);
-      setRecentQuotes(quotesData);
+      setRecentQuotes(quotesData || []);
 
       // Carrega produtos recentes
       const productsData = await api.dashboard.getRecentProducts(5);
-      setRecentProducts(productsData);
+      setRecentProducts(productsData || []);
     } catch (error) {
       console.error('Erro ao carregar dados do dashboard:', error);
     } finally {

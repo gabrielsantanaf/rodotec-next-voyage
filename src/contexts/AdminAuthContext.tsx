@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '@/services/api';
-import { localAuth } from '@/services/localAuth';
 import type { AdminUser, AdminRole } from '@/types/api';
 
 interface AdminAuthContextType {
@@ -35,16 +34,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentUser);
         setRole(currentUser.role);
       } catch (error) {
-        try {
-          const currentUser = await localAuth.getCurrentUser();
-          setUser(currentUser);
-          setRole(currentUser.role);
-        } catch (err) {
-          console.error('Error loading user:', error);
-          localStorage.removeItem('auth_token');
-          setUser(null);
-          setRole(null);
-        }
+        console.error('Error loading user:', error);
+        localStorage.removeItem('auth_token');
+        setUser(null);
+        setRole(null);
       } finally {
         setLoading(false);
       }
@@ -55,17 +48,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      try {
-        const response = await api.auth.login({ email, password });
-        setUser(response.user);
-        setRole(response.user.role);
-        return { error: null };
-      } catch (err) {
-        const response = await localAuth.login({ email, password });
-        setUser(response.user);
-        setRole(response.user.role);
-        return { error: null };
-      }
+      const response = await api.auth.login({ email, password });
+      setUser(response.user);
+      setRole(response.user.role);
+      return { error: null };
     } catch (error: any) {
       console.error('Login error:', error);
       return { error: { message: error.message || 'Erro ao fazer login' } };
@@ -81,7 +67,6 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setRole(null);
       localStorage.removeItem('auth_token');
-      localAuth.logout();
     }
   };
 

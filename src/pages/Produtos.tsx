@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { repository } from "@/data/repository";
-import type { Product, Category } from "@/data/types";
+import api from "@/services/api";
+import type { Product, Category } from "@/types/api";
 
 const Produtos = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,34 +24,54 @@ const Produtos = () => {
   const [quickView, setQuickView] = useState<Product | null>(null);
 
   useEffect(() => {
-    setProducts(repository.getProducts());
-    setCategories(repository.getCategories());
+    loadProducts();
+    loadCategories();
   }, []);
+
+  const loadProducts = async () => {
+    try {
+      const res = await api.products.list({ ativo: true, limit: 1000 });
+      setProducts(res.dados || []);
+    } catch (e) {
+      console.error('Erro ao carregar produtos:', e);
+      setProducts([]);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const res = await api.categories.list({ ativa: true, limit: 100 });
+      setCategories(res.dados || []);
+    } catch (e) {
+      console.error('Erro ao carregar categorias:', e);
+      setCategories([]);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     let list = products.slice();
     if (search.trim()) {
       const s = search.toLowerCase();
       list = list.filter(
-        (p) => p.title.toLowerCase().includes(s) || (p.sku || '').toLowerCase().includes(s)
+        (p) => p.nome.toLowerCase().includes(s) || (p.sku || '').toLowerCase().includes(s)
       );
     }
     if (categoryId) {
-      list = list.filter((p) => p.category_id === categoryId);
+      list = list.filter((p) => p.categoria?._id === categoryId);
     }
     if (availability) {
-      list = list.filter((p) => (p.stock_qty || 0) > 0);
+      list = list.filter((p) => (p.estoque || 0) > 0);
     }
     switch (sort) {
       case 'name_asc':
-        list.sort((a, b) => a.title.localeCompare(b.title));
+        list.sort((a, b) => a.nome.localeCompare(b.nome));
         break;
       case 'created_asc':
-        list.sort((a, b) => a.created_at.localeCompare(b.created_at));
+        list.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
         break;
       case 'created_desc':
       default:
-        list.sort((a, b) => b.created_at.localeCompare(a.created_at));
+        list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         break;
     }
     return list;
@@ -98,18 +118,18 @@ const Produtos = () => {
                 Categorias
               </h3>
               {categories.map((category) => {
-                const isActive = categoryId === category.id;
+                const isActive = categoryId === category._id;
                 return (
                   <button
-                    key={category.id}
-                    onClick={() => setCategoryId(isActive ? '' : category.id)}
+                    key={category._id}
+                    onClick={() => setCategoryId(isActive ? '' : category._id)}
                     className={`flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-left transition-all ${
                       isActive
                         ? "bg-rodotec-blue text-white shadow-lg"
                         : "bg-card text-foreground hover:bg-steel/5"
                     }`}
                   >
-                    <span className="font-medium">{category.name}</span>
+                    <span className="font-medium">{category.nome}</span>
                   </button>
                 );
               })}
@@ -119,18 +139,18 @@ const Produtos = () => {
           {/* Mobile Filters */}
           <div className="mb-8 flex gap-2 overflow-x-auto pb-2 lg:hidden">
             {categories.map((category) => {
-              const isActive = categoryId === category.id;
+              const isActive = categoryId === category._id;
               return (
                 <button
-                  key={category.id}
-                  onClick={() => setCategoryId(isActive ? '' : category.id)}
+                  key={category._id}
+                  onClick={() => setCategoryId(isActive ? '' : category._id)}
                   className={`flex shrink-0 items-center space-x-2 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
                     isActive
                       ? "bg-rodotec-blue text-white"
                       : "bg-card text-foreground"
                   }`}
                 >
-                  <span>{category.name}</span>
+                  <span>{category.nome}</span>
                 </button>
               );
             })}
@@ -171,40 +191,80 @@ const Produtos = () => {
 
             {view === 'grid' ? (
               <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-                {pagedProducts.map((product, index) => (
-                  <div
-                    key={product.id}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <ProductCard product={product} onQuickView={() => setQuickView(product)} />
-                  </div>
-                ))}
+                {pagedProducts.map((product, index) => {
+                  // Converter Product do backend para formato esperado pelo ProductCard
+                  // imagensUrls pode ser array de strings ou array de objetos com url
+                  const images = product.imagensUrls 
+                    ? product.imagensUrls.map((img: any) => typeof img === 'string' ? img : img.url || img)
+                    : (product.imagemPrincipal 
+                      ? [typeof product.imagemPrincipal === 'string' 
+                        ? product.imagemPrincipal 
+                        : product.imagemPrincipal.url || product.imagemPrincipal]
+                      : []);
+                  const productCardData = {
+                    id: product._id,
+                    title: product.nome,
+                    slug: product._id, // Usar ID como slug temporariamente
+                    sku: product.sku,
+                    images,
+                    stock_qty: product.estoque,
+                    category_id: product.categoria?._id || '',
+                    created_at: product.createdAt,
+                  };
+                  return (
+                    <div
+                      key={product._id}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <ProductCard product={productCardData} onQuickView={() => setQuickView(productCardData)} />
+                    </div>
+                  );
+                })}
                 {pagedProducts.length === 0 && (
                   <p className="text-muted-foreground">Nenhum produto encontrado</p>
                 )}
               </div>
             ) : (
               <div className="space-y-4">
-                {pagedProducts.map((product) => (
-                  <Card key={product.id} className="border border-line">
-                    <CardContent className="p-4 flex items-center gap-4">
-                      <div className="aspect-video w-40 overflow-hidden rounded-md bg-muted">
-                        {product.images?.[0] ? (
-                          <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" />
-                        ) : null}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-heading font-bold">{product.title}</h3>
-                        <p className="text-sm text-muted-foreground">SKU: {product.sku || '—'}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link to={`/produtos/${product.slug}`} className="text-sm underline">Ver detalhes</Link>
-                        <button className="text-sm underline" onClick={() => setQuickView(product)}>Quick View</button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {pagedProducts.map((product) => {
+                  const images = product.imagensUrls 
+                    ? product.imagensUrls.map((img: any) => typeof img === 'string' ? img : img.url || img)
+                    : (product.imagemPrincipal 
+                      ? [typeof product.imagemPrincipal === 'string' 
+                        ? product.imagemPrincipal 
+                        : product.imagemPrincipal.url || product.imagemPrincipal]
+                      : []);
+                  const productCardData = {
+                    id: product._id,
+                    title: product.nome,
+                    slug: product._id,
+                    sku: product.sku,
+                    images,
+                    stock_qty: product.estoque,
+                    category_id: product.categoria?._id || '',
+                    created_at: product.createdAt,
+                  };
+                  return (
+                    <Card key={product._id} className="border border-line">
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div className="aspect-video w-40 overflow-hidden rounded-md bg-muted">
+                          {productCardData.images?.[0] ? (
+                            <img src={productCardData.images[0]} alt={productCardData.title} className="w-full h-full object-cover" />
+                          ) : null}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-heading font-bold">{productCardData.title}</h3>
+                          <p className="text-sm text-muted-foreground">SKU: {productCardData.sku || '—'}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Link to={`/produtos/${product._id}`} className="text-sm underline">Ver detalhes</Link>
+                          <button className="text-sm underline" onClick={() => setQuickView(productCardData)}>Quick View</button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
                 {pagedProducts.length === 0 && (
                   <p className="text-muted-foreground">Nenhum produto encontrado</p>
                 )}
@@ -245,7 +305,7 @@ const Produtos = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">SKU: {quickView.sku || '—'}</p>
-                    <Link to={`/produtos/${quickView.slug}`} className="text-sm underline">Ver detalhes</Link>
+                    <Link to={`/produtos/${quickView.id}`} className="text-sm underline">Ver detalhes</Link>
                   </div>
                 </div>
               </>

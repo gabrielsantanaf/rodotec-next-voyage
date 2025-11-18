@@ -17,27 +17,71 @@ const ProdutoDetalhe = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [backendProductId, setBackendProductId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Carregar produto do backend por busca (slug ou título)
-    const term = (slug || '').replace(/-/g, ' ');
-    api.products.list({ search: term }).then((res) => {
-      const first = (res.data || [])[0];
-      if (first) {
+    loadProduct();
+  }, [slug]);
+
+  const loadProduct = async () => {
+    try {
+      setLoading(true);
+      // slug pode ser ID ou slug
+      const productId = slug || '';
+      
+      // Tentar buscar por ID primeiro
+      try {
+        const productData = await api.products.get(productId);
+        // Extrair URLs das imagens corretamente
+        const images = productData.imagensUrls 
+          ? productData.imagensUrls.map((img: any) => typeof img === 'string' ? img : img.url || img)
+          : (productData.imagemPrincipal 
+            ? [typeof productData.imagemPrincipal === 'string' 
+              ? productData.imagemPrincipal 
+              : productData.imagemPrincipal.url || productData.imagemPrincipal]
+            : []);
         setProduct({
-          title: (first as any).nome || first.title,
-          sku: (first as any).sku || first.sku,
-          images: (first as any).imagensUrls?.map((i: any) => i.url) || [],
-          short_description: (first as any).descricao || first.description,
-          technical_specs: (first as any).especificacoes || {},
+          title: productData.nome,
+          sku: productData.sku,
+          images,
+          short_description: productData.descricao,
+          technical_specs: productData.especificacoes || {},
         });
-        setBackendProductId(((first as any)._id || (first as any).id) as string);
+        setBackendProductId(productData._id);
+      } catch (e) {
+        // Se não encontrou por ID, tentar buscar por nome/slug
+        const term = productId.replace(/-/g, ' ');
+        const res = await api.products.list({ search: term, limit: 1 });
+        const first = res.dados?.[0];
+        if (first) {
+          const images = first.imagensUrls 
+            ? first.imagensUrls.map((img: any) => typeof img === 'string' ? img : img.url || img)
+            : (first.imagemPrincipal 
+              ? [typeof first.imagemPrincipal === 'string' 
+                ? first.imagemPrincipal 
+                : first.imagemPrincipal.url || first.imagemPrincipal]
+              : []);
+          setProduct({
+            title: first.nome,
+            sku: first.sku,
+            images,
+            short_description: first.descricao,
+            technical_specs: first.especificacoes || {},
+          });
+          setBackendProductId(first._id);
+        } else {
+          setProduct(null);
+          setBackendProductId(null);
+        }
       }
-    }).catch(() => {
+    } catch (error) {
+      console.error('Erro ao carregar produto:', error);
       setProduct(null);
       setBackendProductId(null);
-    });
-  }, [slug]);
+    } finally {
+      setLoading(false);
+    }
+  };
   const specifications = [
     { label: "Comprimento", value: "7,50 m" },
     { label: "Largura", value: "2,60 m" },
@@ -89,19 +133,23 @@ const ProdutoDetalhe = () => {
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Gallery */}
             <div className="space-y-3">
-              <div className="relative overflow-hidden rounded-2xl border border-steel/20 bg-steel/5">
-                {product?.images?.[0] && (
+              <div className="relative overflow-hidden rounded-2xl border border-steel/20 bg-steel/5 aspect-video">
+                {loading ? (
+                  <div className="flex items-center justify-center h-full">Carregando...</div>
+                ) : product?.images?.[0] ? (
                   <img
                     src={product.images[0]}
                     alt={product.title}
                     className="h-full w-full object-cover"
                   />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">Sem imagem</div>
                 )}
               </div>
               {product?.images && product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
-                  {product.images.slice(1, 5).map((img, idx) => (
-                    <div key={idx} className="overflow-hidden rounded-md border bg-steel/5">
+                  {product.images.slice(1, 5).map((img: string, idx: number) => (
+                    <div key={idx} className="overflow-hidden rounded-md border bg-steel/5 aspect-square">
                       <img src={img} alt={`${product.title} ${idx + 2}`} className="h-full w-full object-cover" />
                     </div>
                   ))}
@@ -228,8 +276,7 @@ const ProdutoDetalhe = () => {
                         email,
                         telefone,
                         mensagem,
-                        produto: backendProductId,
-                        consent_lgpd: true,
+                        produto: backendProductId!,
                       });
                       toast.success('Solicitação enviada!');
                       (e.currentTarget as HTMLFormElement).reset();
