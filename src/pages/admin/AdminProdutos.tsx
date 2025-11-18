@@ -30,9 +30,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toast } from 'sonner';
 import type { Product, Category } from '@/types/api';
 
 export default function AdminProdutos() {
@@ -82,6 +83,21 @@ export default function AdminProdutos() {
     } catch (e) {
       console.error('Erro ao carregar categorias:', e);
       setCategories([]);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string, nome: string) => {
+    if (!confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
+      return;
+    }
+
+    try {
+      await api.products.delete(id);
+      toast.success('Produto excluído com sucesso');
+      loadProducts();
+    } catch (error: any) {
+      console.error('Erro ao excluir produto:', error);
+      toast.error(error?.message || 'Erro ao excluir produto');
     }
   };
 
@@ -217,6 +233,7 @@ export default function AdminProdutos() {
                   <TableHead>SKU</TableHead>
                   <TableHead>Estoque</TableHead>
                   <TableHead>Criado</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -258,6 +275,23 @@ export default function AdminProdutos() {
                           addSuffix: true,
                           locale: ptBR,
                         })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link to={`/admin/produtos/${product._id}`}>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteProduct(product._id, product.nome)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -317,6 +351,22 @@ export default function AdminProdutos() {
                             addSuffix: true,
                             locale: ptBR,
                           })}
+                        </div>
+                        <div className="flex items-center gap-2 pt-2">
+                          <Link to={`/admin/produtos/${product._id}`} className="flex-1">
+                            <Button variant="outline" size="sm" className="w-full">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteProduct(product._id, product.nome)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
