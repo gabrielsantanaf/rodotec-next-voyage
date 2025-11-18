@@ -475,6 +475,7 @@ const Produtos = () => {
           </div>
         </div>
       </div>
+    </div>
 
       <Dialog open={!!quickView} onOpenChange={(open) => !open && setQuickView(null)}>
         <DialogContent className="sm:max-w-2xl">
