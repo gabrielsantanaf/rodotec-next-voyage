@@ -21,6 +21,7 @@ import AdminOrcamentoDetalhe from "./pages/admin/AdminOrcamentoDetalhe";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminProdutos from "./pages/admin/AdminProdutos";
 import AdminProdutoEditor from "./pages/admin/AdminProdutoEditor";
+import AdminCategorias from "./pages/admin/AdminCategorias";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -94,6 +95,14 @@ const App = () => (
               element={
                 <ProtectedAdminRoute>
                   <AdminProdutoEditor />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/categorias"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminCategorias />
                 </ProtectedAdminRoute>
               }
             />

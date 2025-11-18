@@ -11,11 +11,7 @@ import {
   Package,
   LogOut,
   Search,
-
-
-
-
-
+  FolderTree,
   Download,
   Upload,
   RotateCcw,
@@ -34,14 +30,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 const sidebarItems = [
   { icon: Home, label: 'Dashboard', path: '/admin' },
   { icon: FileText, label: 'Orçamentos', path: '/admin/orcamentos' },
-
-
-
-
-
-
-  { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   { icon: Package, label: 'Produtos', path: '/admin/produtos' },
+  { icon: FolderTree, label: 'Categorias', path: '/admin/categorias' },
+  { icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
