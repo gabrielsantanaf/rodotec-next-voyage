@@ -145,42 +145,58 @@ const ProdutoDetalhe = () => {
       <SideNav />
 
       <main className="pb-20 lg:ml-24">
-      <section className="border-b border-steel/20 bg-navy/50 py-4">
+      <section className="border-b border-steel/20 bg-gradient-to-r from-navy via-navy/95 to-navy/90 py-4">
         <div className="container mx-auto px-4 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-white/70">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <span>/</span>
-            <Link to="/produtos" className="hover:text-white transition-colors">Produtos</Link>
-            <span>/</span>
-            <span className="text-white">Carroceria Baú em Alumínio</span>
+            <Link to="/" className="hover:text-white transition-colors duration-200">Home</Link>
+            <ChevronRight className="h-4 w-4" />
+            <Link to="/produtos" className="hover:text-white transition-colors duration-200">Produtos</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-white font-medium">{product?.title || 'Produto'}</span>
           </nav>
         </div>
       </section>
 
       {/* Hero Product */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-12 lg:grid-cols-2">
-            {/* Gallery */}
-            <div className="space-y-3">
-              <div className="relative overflow-hidden rounded-2xl border border-steel/20 bg-steel/5 aspect-video">
+      <section className="py-16 lg:py-20">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* Gallery Aprimorada */}
+            <div className="space-y-4">
+              <div className="relative overflow-hidden rounded-2xl border border-steel/10 bg-gradient-to-br from-steel/5 to-steel/10 aspect-video shadow-lg group">
                 {loading ? (
-                  <div className="flex items-center justify-center h-full">Carregando...</div>
+                  <div className="flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 border-4 border-rodotec-blue/20 border-t-rodotec-blue rounded-full animate-spin" />
+                      <p className="text-sm text-muted-foreground">Carregando...</p>
+                    </div>
+                  </div>
                 ) : product?.images?.[0] ? (
                   <img
                     src={product.images[0]}
                     alt={product.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">Sem imagem</div>
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="text-center">
+                      <svg className="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-sm">Sem imagem disponível</p>
+                    </div>
+                  </div>
                 )}
               </div>
               {product?.images && product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
                   {product.images.slice(1, 5).map((img: string, idx: number) => (
-                    <div key={idx} className="overflow-hidden rounded-md border bg-steel/5 aspect-square">
-                      <img src={img} alt={`${product.title} ${idx + 2}`} className="h-full w-full object-cover" />
+                    <div key={idx} className="overflow-hidden rounded-xl border border-steel/10 bg-steel/5 aspect-square hover:border-rodotec-blue/40 transition-all duration-200 cursor-pointer group">
+                      <img
+                        src={img}
+                        alt={`${product.title} ${idx + 2}`}
+                        className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
                     </div>
                   ))}
                 </div>
@@ -189,52 +205,54 @@ const ProdutoDetalhe = () => {
 
             {/* Info */}
             <div className="space-y-8">
-              <div>
-                <h1 className="mb-2 font-heading text-4xl font-bold text-foreground md:text-5xl">
+              <div className="space-y-4">
+                <h1 className="font-heading text-4xl font-bold text-foreground md:text-5xl lg:text-6xl leading-tight">
                   {product?.title || 'Produto'}
                 </h1>
-                <p className="text-sm text-muted-foreground">SKU: {product?.sku || '—'}</p>
-                <p className="mt-2 text-xl text-muted-foreground">
+                <div className="flex items-center gap-4">
+                  <span className="inline-block px-4 py-1.5 text-sm font-medium bg-rodotec-blue/10 text-rodotec-blue rounded-full">
+                    SKU: {product?.sku || '—'}
+                  </span>
+                </div>
+                <p className="text-lg text-muted-foreground leading-relaxed md:text-xl">
                   {product?.short_description || 'Detalhes do produto'}
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="font-heading text-lg font-bold text-foreground">
+              <div className="space-y-5">
+                <h3 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
+                  <div className="h-1 w-8 bg-rodotec-blue rounded-full" />
                   Principais Benefícios
                 </h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
-                    <span className="text-muted-foreground">
-                      Redução de até 40% na tara comparado a carrocerias convencionais
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
-                    <span className="text-muted-foreground">
-                      Material resistente à corrosão sem necessidade de pintura periódica
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
-                    <span className="text-muted-foreground">
-                      Estanqueidade superior para proteção total da carga
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2 mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-rodotec-blue" />
-                    <span className="text-muted-foreground">
-                      Sistema de ventilação otimizado para cargas sensíveis
-                    </span>
-                  </li>
+                <ul className="space-y-3">
+                  {[
+                    'Redução de até 40% na tara comparado a carrocerias convencionais',
+                    'Material resistente à corrosão sem necessidade de pintura periódica',
+                    'Estanqueidade superior para proteção total da carga',
+                    'Sistema de ventilação otimizado para cargas sensíveis'
+                  ].map((benefit, idx) => (
+                    <li key={idx} className="flex items-start group">
+                      <div className="mr-3 mt-1.5 h-6 w-6 flex-shrink-0 rounded-full bg-gradient-to-br from-rodotec-blue to-accent flex items-center justify-center shadow-sm shadow-rodotec-blue/30">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">
+                        {benefit}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <Button size="lg" variant="outline" className="flex-1">
+              <div className="flex flex-col gap-3 sm:flex-row pt-4">
+                <Button size="lg" variant="outline" className="flex-1 border-steel/20 hover:border-rodotec-blue/40 transition-all duration-200 h-12">
                   <Download className="mr-2 h-5 w-5" />
                   Baixar Ficha Técnica
+                </Button>
+                <Button size="lg" className="flex-1 bg-gradient-to-r from-rodotec-blue to-accent hover:shadow-lg hover:shadow-rodotec-blue/30 transition-all duration-200 h-12">
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Solicitar Orçamento
                 </Button>
               </div>
             </div>
@@ -243,24 +261,32 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Why This Product */}
-      <section className="bg-steel/5 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center font-heading text-3xl font-bold text-foreground md:text-4xl">
-            Por que escolher este produto
-          </h2>
-          <div className="grid gap-8 md:grid-cols-3">
+      <section className="bg-gradient-to-br from-steel/5 to-background py-20 lg:py-24">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl mb-4">
+              Por que escolher este produto
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Tecnologia e qualidade em cada detalhe
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon;
               return (
-                <Card key={index} className="border-steel/20">
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rodotec-blue text-white">
-                      <Icon className="h-6 w-6" />
+                <Card
+                  key={index}
+                  className="border-steel/10 bg-gradient-to-br from-card to-card/50 hover:border-rodotec-blue/40 transition-all duration-300 hover:shadow-xl group"
+                >
+                  <CardContent className="p-8">
+                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-lg shadow-rodotec-blue/30 group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="h-8 w-8" />
                     </div>
-                    <h3 className="mb-2 font-heading text-lg font-bold text-foreground">
+                    <h3 className="mb-3 font-heading text-xl font-bold text-foreground group-hover:text-rodotec-blue transition-colors">
                       {benefit.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground leading-relaxed">
                       {benefit.description}
                     </p>
                   </CardContent>
@@ -272,12 +298,19 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Solicitar Orçamento */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="mb-8 font-heading text-3xl font-bold text-foreground">Solicitar Orçamento</h2>
-            <Card className="border-steel/20">
-              <CardContent className="p-6 space-y-4">
+      <section className="py-20 lg:py-24">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl mb-4">
+                Solicitar Orçamento
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Preencha o formulário e entraremos em contato em até 24 horas
+              </p>
+            </div>
+            <Card className="border-steel/10 bg-gradient-to-br from-card to-card/50 shadow-xl">
+              <CardContent className="p-8 lg:p-10 space-y-6">
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -315,34 +348,67 @@ const ProdutoDetalhe = () => {
                       toast.error(msg);
                     }
                   }}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="nome">Nome *</Label>
-                      <Input id="nome" name="nome" placeholder="Seu nome" />
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="nome" className="text-sm font-medium">Nome *</Label>
+                      <Input
+                        id="nome"
+                        name="nome"
+                        placeholder="Seu nome completo"
+                        className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                      />
                     </div>
-                    <div>
-                      <Label htmlFor="email">E-mail *</Label>
-                      <Input id="email" name="email" type="email" placeholder="seu@email.com" />
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium">E-mail *</Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                      />
                     </div>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="telefone">Telefone/WhatsApp *</Label>
-                      <Input id="telefone" name="telefone" placeholder="(00) 00000-0000" />
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="telefone" className="text-sm font-medium">Telefone/WhatsApp *</Label>
+                      <Input
+                        id="telefone"
+                        name="telefone"
+                        placeholder="(00) 00000-0000"
+                        className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                      />
                     </div>
-                    <div>
-                      <Label>Produto</Label>
-                      <Input value={product?.title || ''} readOnly />
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Produto</Label>
+                      <Input
+                        value={product?.title || ''}
+                        readOnly
+                        className="h-12 bg-steel/5 border-steel/10 cursor-not-allowed"
+                      />
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="mensagem">Mensagem</Label>
-                    <Textarea id="mensagem" name="mensagem" rows={4} placeholder="Descreva sua necessidade" />
+                  <div className="space-y-2">
+                    <Label htmlFor="mensagem" className="text-sm font-medium">Mensagem</Label>
+                    <Textarea
+                      id="mensagem"
+                      name="mensagem"
+                      rows={5}
+                      placeholder="Descreva sua necessidade, quantidade desejada, prazo de entrega..."
+                      className="border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20 resize-none"
+                    />
                   </div>
-                  <div className="flex justify-end">
-                    <Button type="submit">Enviar Solicitação</Button>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="flex-1 bg-gradient-to-r from-rodotec-blue to-accent hover:shadow-lg hover:shadow-rodotec-blue/30 transition-all duration-200 h-12"
+                    >
+                      <Mail className="mr-2 h-5 w-5" />
+                      Enviar Solicitação
+                    </Button>
                   </div>
                 </form>
               </CardContent>
@@ -352,27 +418,47 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Specifications */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="mb-8 font-heading text-3xl font-bold text-foreground">
-              Especificações Técnicas
-            </h2>
+      <section className="py-20 lg:py-24 bg-gradient-to-br from-background to-steel/5">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-5xl">
+            <div className="text-center mb-16">
+              <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl mb-4">
+                Especificações Técnicas
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Dados técnicos detalhados do produto
+              </p>
+            </div>
 
-            <Card className="mb-8 border-steel/20">
-              <CardContent className="p-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  {product?.technical_specs && Object.entries(product.technical_specs).length > 0 ? (
-                    Object.entries(product.technical_specs).map(([label, value], index) => (
-                      <div key={index} className="flex justify-between border-b border-steel/10 pb-3 last:border-0">
-                        <span className="font-medium text-muted-foreground">{label}</span>
-                        <span className="font-bold text-foreground">{String(value)}</span>
+            <Card className="mb-10 border-steel/10 bg-gradient-to-br from-card to-card/50 shadow-xl">
+              <CardContent className="p-8 lg:p-10">
+                {product?.technical_specs && Object.entries(product.technical_specs).length > 0 ? (
+                  <div className="grid gap-5 md:grid-cols-2">
+                    {Object.entries(product.technical_specs).map(([label, value], index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 rounded-xl bg-background/50 border border-steel/10 hover:border-rodotec-blue/40 transition-all duration-200 group"
+                      >
+                        <span className="font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                          {label}
+                        </span>
+                        <span className="font-bold text-foreground text-lg">
+                          {String(value)}
+                        </span>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground">Nenhuma especificação disponível.</p>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-20 h-20 mb-4 rounded-full bg-steel/10 flex items-center justify-center">
+                      <svg className="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-lg font-medium text-foreground">Nenhuma especificação disponível</p>
+                    <p className="text-sm text-muted-foreground mt-1">Entre em contato para mais informações</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
