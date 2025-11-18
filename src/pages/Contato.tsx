@@ -107,53 +107,48 @@ const Contato = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Breadcrumb */}
-      <section className="border-b border-steel/20 bg-gradient-to-r from-navy via-navy/95 to-navy/90 py-4">
+      {/* Breadcrumb - Clean */}
+      <section className="border-b bg-slate-50/50 py-3">
         <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-white/70">
-            <Link to="/" className="hover:text-white transition-colors duration-200">
+          <nav className="flex items-center gap-2 text-sm text-slate-600">
+            <Link to="/" className="hover:text-rodotec-blue transition-colors">
               Home
             </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-white font-medium">Contato</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-slate-900 font-medium">Contato</span>
           </nav>
         </div>
       </section>
 
-      {/* Hero Aprimorado */}
-      <section className="relative bg-gradient-to-br from-navy via-navy to-navy/95 py-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 h-64 w-64 rounded-full bg-rodotec-blue blur-3xl" />
-          <div className="absolute bottom-10 left-10 h-48 w-48 rounded-full bg-accent blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 lg:px-8 relative">
+      {/* Hero - Clean e Moderno */}
+      <section className="bg-gradient-to-b from-slate-50 to-white py-12 lg:py-16 border-b">
+        <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="font-heading text-5xl font-bold text-white md:text-6xl lg:text-7xl mb-6 leading-tight">
+            <h1 className="font-heading text-4xl font-bold text-slate-900 md:text-5xl lg:text-6xl mb-4 tracking-tight">
               Entre em Contato
             </h1>
-            <p className="text-xl text-white/90 md:text-2xl leading-relaxed">
+            <p className="text-lg text-slate-600 leading-relaxed">
               Estamos prontos para atender você. Preencha o formulário ou use nossos canais diretos.
             </p>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      <section className="py-20 lg:py-24">
+      <section className="py-20 lg:py-24 bg-slate-50/30">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-3 lg:gap-16">
             {/* Contact Info */}
             <div className="space-y-6">
-              <Card className="border-steel/10 bg-gradient-to-br from-card to-card/50 hover:border-rodotec-blue/40 transition-all duration-300 hover:shadow-xl group">
+              <Card className="border-slate-200/60 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 group">
                 <CardContent className="p-8">
-                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-lg shadow-rodotec-blue/30 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-sm group-hover:scale-110 transition-transform duration-300">
                     <MapPin className="h-7 w-7" />
                   </div>
-                  <h3 className="mb-3 font-heading text-xl font-bold text-foreground">Endereço</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <h3 className="mb-3 font-heading text-xl font-bold text-slate-900">Endereço</h3>
+                  <p className="text-slate-600 leading-relaxed">
                     Av. Industrial, 1500
                     <br />
                     Distrito Industrial
@@ -163,13 +158,13 @@ const Contato = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-steel/10 bg-gradient-to-br from-card to-card/50 hover:border-rodotec-blue/40 transition-all duration-300 hover:shadow-xl group">
+              <Card className="border-slate-200/60 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 group">
                 <CardContent className="p-8">
-                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-lg shadow-rodotec-blue/30 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-sm group-hover:scale-110 transition-transform duration-300">
                     <Phone className="h-7 w-7" />
                   </div>
-                  <h3 className="mb-3 font-heading text-xl font-bold text-foreground">Telefone</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <h3 className="mb-3 font-heading text-xl font-bold text-slate-900">Telefone</h3>
+                  <p className="text-slate-600 leading-relaxed">
                     <a href="tel:+551130000000" className="hover:text-rodotec-blue transition-colors">
                       (11) 3000-0000
                     </a>
@@ -183,13 +178,13 @@ const Contato = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-steel/10 bg-gradient-to-br from-card to-card/50 hover:border-rodotec-blue/40 transition-all duration-300 hover:shadow-xl group">
+              <Card className="border-slate-200/60 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 group">
                 <CardContent className="p-8">
-                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-lg shadow-rodotec-blue/30 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-sm group-hover:scale-110 transition-transform duration-300">
                     <Mail className="h-7 w-7" />
                   </div>
-                  <h3 className="mb-3 font-heading text-xl font-bold text-foreground">E-mail</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <h3 className="mb-3 font-heading text-xl font-bold text-slate-900">E-mail</h3>
+                  <p className="text-slate-600 leading-relaxed">
                     <a href="mailto:contato@rodotec.com.br" className="hover:text-rodotec-blue transition-colors">
                       contato@rodotec.com.br
                     </a>
@@ -208,13 +203,13 @@ const Contato = () => {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <Card className="border-steel/10 bg-gradient-to-br from-card to-card/50 shadow-xl">
+              <Card className="border-slate-200/60 bg-white shadow-sm">
                 <CardContent className="p-8 lg:p-10">
                   <div className="mb-8">
-                    <h2 className="font-heading text-3xl font-bold text-foreground mb-2">
+                    <h2 className="font-heading text-3xl font-bold text-slate-900 mb-2 tracking-tight">
                       Solicitar Orçamento
                     </h2>
-                    <p className="text-muted-foreground">
+                    <p className="text-slate-600">
                       Preencha os dados abaixo e retornaremos em breve
                     </p>
                   </div>
@@ -229,7 +224,7 @@ const Contato = () => {
                           required
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                          className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                         />
                       </div>
 
@@ -240,7 +235,7 @@ const Contato = () => {
                           placeholder="Nome da empresa"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                          className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                         />
                       </div>
                     </div>
@@ -255,7 +250,7 @@ const Contato = () => {
                           required
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                          className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                         />
                       </div>
 
@@ -268,7 +263,7 @@ const Contato = () => {
                           required
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                          className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                         />
                       </div>
                     </div>
@@ -279,7 +274,7 @@ const Contato = () => {
                         value={formData.productId}
                         onValueChange={(value) => setFormData({ ...formData, productId: value })}
                       >
-                        <SelectTrigger className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20">
+                        <SelectTrigger className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20">
                           <SelectValue placeholder="Selecione um produto" />
                         </SelectTrigger>
                         <SelectContent>
@@ -307,7 +302,7 @@ const Contato = () => {
                         required
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20 resize-none"
+                        className="border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20 resize-none"
                       />
                     </div>
 

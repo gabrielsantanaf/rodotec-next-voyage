@@ -406,100 +406,98 @@ const Produtos = () => {
                 )}
               </div>
             )}
+
+            {/* Paginação - Clean e Moderna */}
+            {totalPages > 1 && (
+              <div className="mt-10 flex items-center justify-center">
+                <div className="inline-flex items-center gap-2 bg-white rounded-xl p-2 shadow-sm border border-slate-200/60">
+                  <button
+                    className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                      currentPage === 1
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                    onClick={() => setPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Anterior
+                  </button>
+
+                  <div className="flex items-center gap-1 px-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-rodotec-blue text-white shadow-sm'
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                      currentPage === totalPages
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                    onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Próxima
+                    <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-          {/* Paginação - Clean e Moderna */}
-          {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center">
-              <div className="inline-flex items-center gap-2 bg-white rounded-xl p-2 shadow-sm border border-slate-200/60">
-                <button
-                  className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                    currentPage === 1
-                      ? 'text-slate-400 cursor-not-allowed'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                  onClick={() => setPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Anterior
-                </button>
-
-                <div className="flex items-center gap-1 px-2">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className={`inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                          currentPage === pageNum
-                            ? 'bg-rodotec-blue text-white shadow-sm'
-                            : 'text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+      <Dialog open={!!quickView} onOpenChange={(open) => !open && setQuickView(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          {quickView && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{quickView.title}</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="aspect-video w-full overflow-hidden rounded-md bg-muted">
+                  {quickView.images?.[0] && (
+                    <img src={quickView.images[0]} alt={quickView.title} className="w-full h-full object-cover" />
+                  )}
                 </div>
-
-                <button
-                  className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                    currentPage === totalPages
-                      ? 'text-slate-400 cursor-not-allowed'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                  onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Próxima
-                  <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">SKU: {quickView.sku || '—'}</p>
+                  <Link to={`/produtos/${quickView.id}`} className="text-sm underline">Ver detalhes</Link>
+                </div>
               </div>
-            </div>
+            </>
           )}
-        </div>
-      </div>
-
-        <Dialog open={!!quickView} onOpenChange={(open) => !open && setQuickView(null)}>
-          <DialogContent className="sm:max-w-2xl">
-            {quickView && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>{quickView.title}</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="aspect-video w-full overflow-hidden rounded-md bg-muted">
-                    {quickView.images?.[0] && (
-                      <img src={quickView.images[0]} alt={quickView.title} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">SKU: {quickView.sku || '—'}</p>
-                    <Link to={`/produtos/${quickView.id}`} className="text-sm underline">Ver detalhes</Link>
-                  </div>
-                </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

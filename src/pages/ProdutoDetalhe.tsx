@@ -140,30 +140,31 @@ const ProdutoDetalhe = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <Header />
       <SideNav />
 
       <main className="pb-20 lg:ml-24">
-      <section className="border-b border-steel/20 bg-gradient-to-r from-navy via-navy/95 to-navy/90 py-4">
+      {/* Breadcrumb - Clean */}
+      <section className="border-b bg-slate-50/50 py-3">
         <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-white/70">
-            <Link to="/" className="hover:text-white transition-colors duration-200">Home</Link>
-            <ChevronRight className="h-4 w-4" />
-            <Link to="/produtos" className="hover:text-white transition-colors duration-200">Produtos</Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-white font-medium">{product?.title || 'Produto'}</span>
+          <nav className="flex items-center gap-2 text-sm text-slate-600">
+            <Link to="/" className="hover:text-rodotec-blue transition-colors">Home</Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <Link to="/produtos" className="hover:text-rodotec-blue transition-colors">Produtos</Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-slate-900 font-medium">{product?.title || 'Produto'}</span>
           </nav>
         </div>
       </section>
 
       {/* Hero Product */}
-      <section className="py-16 lg:py-20">
+      <section className="py-16 lg:py-20 bg-gradient-to-b from-slate-50 to-white">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             {/* Gallery Aprimorada */}
             <div className="space-y-4">
-              <div className="relative overflow-hidden rounded-2xl border border-steel/10 bg-gradient-to-br from-steel/5 to-steel/10 aspect-video shadow-lg group">
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-100 aspect-video shadow-sm group">
                 {loading ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="flex flex-col items-center gap-3">
@@ -191,7 +192,7 @@ const ProdutoDetalhe = () => {
               {product?.images && product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
                   {product.images.slice(1, 5).map((img: string, idx: number) => (
-                    <div key={idx} className="overflow-hidden rounded-xl border border-steel/10 bg-steel/5 aspect-square hover:border-rodotec-blue/40 transition-all duration-200 cursor-pointer group">
+                    <div key={idx} className="overflow-hidden rounded-xl border border-slate-200/60 bg-slate-100 aspect-square hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer group">
                       <img
                         src={img}
                         alt={`${product.title} ${idx + 2}`}
@@ -206,21 +207,21 @@ const ProdutoDetalhe = () => {
             {/* Info */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <h1 className="font-heading text-4xl font-bold text-foreground md:text-5xl lg:text-6xl leading-tight">
+                <h1 className="font-heading text-4xl font-bold text-slate-900 md:text-5xl lg:text-6xl leading-tight tracking-tight">
                   {product?.title || 'Produto'}
                 </h1>
                 <div className="flex items-center gap-4">
-                  <span className="inline-block px-4 py-1.5 text-sm font-medium bg-rodotec-blue/10 text-rodotec-blue rounded-full">
+                  <span className="inline-block px-4 py-1.5 text-sm font-medium bg-rodotec-blue/10 text-rodotec-blue rounded-full border border-rodotec-blue/20">
                     SKU: {product?.sku || '—'}
                   </span>
                 </div>
-                <p className="text-lg text-muted-foreground leading-relaxed md:text-xl">
+                <p className="text-lg text-slate-600 leading-relaxed md:text-xl">
                   {product?.short_description || 'Detalhes do produto'}
                 </p>
               </div>
 
               <div className="space-y-5">
-                <h3 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
+                <h3 className="font-heading text-xl font-bold text-slate-900 flex items-center gap-2">
                   <div className="h-1 w-8 bg-rodotec-blue rounded-full" />
                   Principais Benefícios
                 </h3>
@@ -232,12 +233,12 @@ const ProdutoDetalhe = () => {
                     'Sistema de ventilação otimizado para cargas sensíveis'
                   ].map((benefit, idx) => (
                     <li key={idx} className="flex items-start group">
-                      <div className="mr-3 mt-1.5 h-6 w-6 flex-shrink-0 rounded-full bg-gradient-to-br from-rodotec-blue to-accent flex items-center justify-center shadow-sm shadow-rodotec-blue/30">
+                      <div className="mr-3 mt-1.5 h-6 w-6 flex-shrink-0 rounded-full bg-gradient-to-br from-rodotec-blue to-accent flex items-center justify-center shadow-sm">
                         <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">
+                      <span className="text-slate-600 group-hover:text-slate-900 transition-colors leading-relaxed">
                         {benefit}
                       </span>
                     </li>
@@ -246,7 +247,7 @@ const ProdutoDetalhe = () => {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row pt-4">
-                <Button size="lg" variant="outline" className="flex-1 border-steel/20 hover:border-rodotec-blue/40 transition-all duration-200 h-12">
+                <Button size="lg" variant="outline" className="flex-1 border-slate-200 hover:border-rodotec-blue hover:bg-slate-50 transition-all duration-200 h-12">
                   <Download className="mr-2 h-5 w-5" />
                   Baixar Ficha Técnica
                 </Button>
@@ -261,13 +262,13 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Why This Product */}
-      <section className="bg-gradient-to-br from-steel/5 to-background py-20 lg:py-24">
+      <section className="bg-slate-50 py-20 lg:py-24">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl mb-4">
+            <h2 className="font-heading text-4xl font-bold text-slate-900 md:text-5xl mb-4 tracking-tight">
               Por que escolher este produto
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Tecnologia e qualidade em cada detalhe
             </p>
           </div>
@@ -277,16 +278,16 @@ const ProdutoDetalhe = () => {
               return (
                 <Card
                   key={index}
-                  className="border-steel/10 bg-gradient-to-br from-card to-card/50 hover:border-rodotec-blue/40 transition-all duration-300 hover:shadow-xl group"
+                  className="border-slate-200/60 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 group"
                 >
                   <CardContent className="p-8">
-                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-lg shadow-rodotec-blue/30 group-hover:scale-110 transition-transform duration-300">
+                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rodotec-blue to-accent text-white shadow-sm group-hover:scale-110 transition-transform duration-300">
                       <Icon className="h-8 w-8" />
                     </div>
-                    <h3 className="mb-3 font-heading text-xl font-bold text-foreground group-hover:text-rodotec-blue transition-colors">
+                    <h3 className="mb-3 font-heading text-xl font-bold text-slate-900 group-hover:text-rodotec-blue transition-colors">
                       {benefit.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-slate-600 leading-relaxed">
                       {benefit.description}
                     </p>
                   </CardContent>
@@ -298,18 +299,18 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Solicitar Orçamento */}
-      <section className="py-20 lg:py-24">
+      <section className="py-20 lg:py-24 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="mx-auto max-w-4xl">
             <div className="text-center mb-12">
-              <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl mb-4">
+              <h2 className="font-heading text-4xl font-bold text-slate-900 md:text-5xl mb-4 tracking-tight">
                 Solicitar Orçamento
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-slate-600">
                 Preencha o formulário e entraremos em contato em até 24 horas
               </p>
             </div>
-            <Card className="border-steel/10 bg-gradient-to-br from-card to-card/50 shadow-xl">
+            <Card className="border-slate-200/60 bg-white shadow-sm">
               <CardContent className="p-8 lg:p-10 space-y-6">
                 <form
                   onSubmit={async (e) => {
@@ -357,7 +358,7 @@ const ProdutoDetalhe = () => {
                         id="nome"
                         name="nome"
                         placeholder="Seu nome completo"
-                        className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                        className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                       />
                     </div>
                     <div className="space-y-2">
@@ -367,7 +368,7 @@ const ProdutoDetalhe = () => {
                         name="email"
                         type="email"
                         placeholder="seu@email.com"
-                        className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                        className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                       />
                     </div>
                   </div>
@@ -378,7 +379,7 @@ const ProdutoDetalhe = () => {
                         id="telefone"
                         name="telefone"
                         placeholder="(00) 00000-0000"
-                        className="h-12 border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
+                        className="h-12 border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20"
                       />
                     </div>
                     <div className="space-y-2">
@@ -386,7 +387,7 @@ const ProdutoDetalhe = () => {
                       <Input
                         value={product?.title || ''}
                         readOnly
-                        className="h-12 bg-steel/5 border-steel/10 cursor-not-allowed"
+                        className="h-12 bg-slate-100 border-slate-200 cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -397,7 +398,7 @@ const ProdutoDetalhe = () => {
                       name="mensagem"
                       rows={5}
                       placeholder="Descreva sua necessidade, quantidade desejada, prazo de entrega..."
-                      className="border-steel/20 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20 resize-none"
+                      className="border-slate-200 focus:border-rodotec-blue/50 focus:ring-2 focus:ring-rodotec-blue/20 resize-none"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -418,31 +419,31 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Specifications */}
-      <section className="py-20 lg:py-24 bg-gradient-to-br from-background to-steel/5">
+      <section className="py-20 lg:py-24 bg-slate-50">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="mx-auto max-w-5xl">
             <div className="text-center mb-16">
-              <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl mb-4">
+              <h2 className="font-heading text-4xl font-bold text-slate-900 md:text-5xl mb-4 tracking-tight">
                 Especificações Técnicas
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-slate-600">
                 Dados técnicos detalhados do produto
               </p>
             </div>
 
-            <Card className="mb-10 border-steel/10 bg-gradient-to-br from-card to-card/50 shadow-xl">
+            <Card className="mb-10 border-slate-200/60 bg-white shadow-sm">
               <CardContent className="p-8 lg:p-10">
                 {product?.technical_specs && Object.entries(product.technical_specs).length > 0 ? (
                   <div className="grid gap-5 md:grid-cols-2">
                     {Object.entries(product.technical_specs).map(([label, value], index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-4 rounded-xl bg-background/50 border border-steel/10 hover:border-rodotec-blue/40 transition-all duration-200 group"
+                        className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200/60 hover:border-slate-300 hover:shadow-sm transition-all duration-200 group"
                       >
-                        <span className="font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="font-semibold text-slate-600 group-hover:text-slate-900 transition-colors">
                           {label}
                         </span>
-                        <span className="font-bold text-foreground text-lg">
+                        <span className="font-bold text-slate-900 text-lg">
                           {String(value)}
                         </span>
                       </div>
@@ -450,24 +451,24 @@ const ProdutoDetalhe = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="mx-auto w-20 h-20 mb-4 rounded-full bg-steel/10 flex items-center justify-center">
-                      <svg className="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="mx-auto w-20 h-20 mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+                      <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <p className="text-lg font-medium text-foreground">Nenhuma especificação disponível</p>
-                    <p className="text-sm text-muted-foreground mt-1">Entre em contato para mais informações</p>
+                    <p className="text-lg font-medium text-slate-900">Nenhuma especificação disponível</p>
+                    <p className="text-sm text-slate-500 mt-1">Entre em contato para mais informações</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
             <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="applications" className="rounded-2xl border border-steel/20 bg-card px-6">
+              <AccordionItem value="applications" className="rounded-2xl border border-slate-200/60 bg-white px-6">
                 <AccordionTrigger className="font-heading font-bold hover:no-underline">
                   Aplicações Ideais
                 </AccordionTrigger>
-                <AccordionContent className="space-y-2 text-muted-foreground">
+                <AccordionContent className="space-y-2 text-slate-600">
                   <p>• Transporte de paletes e cargas gerais</p>
                   <p>• Distribuição urbana e interestadual</p>
                   <p>• Movimentação de produtos secos e embalados</p>
@@ -475,11 +476,11 @@ const ProdutoDetalhe = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="compatibility" className="rounded-2xl border border-steel/20 bg-card px-6">
+              <AccordionItem value="compatibility" className="rounded-2xl border border-slate-200/60 bg-white px-6">
                 <AccordionTrigger className="font-heading font-bold hover:no-underline">
                   Compatibilidade
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-slate-600">
                   <p className="mb-2">Compatible com os principais chassis do mercado:</p>
                   <p>• Mercedes-Benz (toda linha)</p>
                   <p>• Volkswagen (toda linha)</p>
@@ -489,11 +490,11 @@ const ProdutoDetalhe = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="optionals" className="rounded-2xl border border-steel/20 bg-card px-6">
+              <AccordionItem value="optionals" className="rounded-2xl border border-slate-200/60 bg-white px-6">
                 <AccordionTrigger className="font-heading font-bold hover:no-underline">
                   Opcionais Disponíveis
                 </AccordionTrigger>
-                <AccordionContent className="space-y-2 text-muted-foreground">
+                <AccordionContent className="space-y-2 text-slate-600">
                   <p>• Plataforma elevatória traseira</p>
                   <p>• Porta lateral escamoteável</p>
                   <p>• Sistema de amarração de carga</p>
@@ -507,43 +508,43 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* Downloads */}
-      <section className="bg-steel/5 py-16">
+      <section className="bg-white py-16">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <h2 className="mb-8 font-heading text-3xl font-bold text-foreground">
+            <h2 className="mb-8 font-heading text-3xl font-bold text-slate-900 tracking-tight">
               Documentação Técnica
             </h2>
             <div className="grid gap-4 md:grid-cols-3">
-              <Card className="border-steel/20 transition-all hover:border-rodotec-blue/40">
+              <Card className="border-slate-200/60 transition-all hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6 text-center">
                   <FileText className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
-                  <h3 className="mb-2 font-heading font-bold text-foreground">Catálogo</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">PDF • 2.4 MB</p>
-                  <Button variant="outline" size="sm" className="w-full">
+                  <h3 className="mb-2 font-heading font-bold text-slate-900">Catálogo</h3>
+                  <p className="mb-4 text-sm text-slate-500">PDF • 2.4 MB</p>
+                  <Button variant="outline" size="sm" className="w-full border-slate-200 hover:border-rodotec-blue hover:bg-slate-50">
                     <Download className="mr-2 h-4 w-4" />
                     Baixar
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="border-steel/20 transition-all hover:border-rodotec-blue/40">
+              <Card className="border-slate-200/60 transition-all hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6 text-center">
                   <FileText className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
-                  <h3 className="mb-2 font-heading font-bold text-foreground">Ficha Técnica</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">PDF • 1.1 MB</p>
-                  <Button variant="outline" size="sm" className="w-full">
+                  <h3 className="mb-2 font-heading font-bold text-slate-900">Ficha Técnica</h3>
+                  <p className="mb-4 text-sm text-slate-500">PDF • 1.1 MB</p>
+                  <Button variant="outline" size="sm" className="w-full border-slate-200 hover:border-rodotec-blue hover:bg-slate-50">
                     <Download className="mr-2 h-4 w-4" />
                     Baixar
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="border-steel/20 transition-all hover:border-rodotec-blue/40">
+              <Card className="border-slate-200/60 transition-all hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6 text-center">
                   <FileText className="mx-auto mb-4 h-12 w-12 text-rodotec-blue" />
-                  <h3 className="mb-2 font-heading font-bold text-foreground">Manual</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">PDF • 3.8 MB</p>
-                  <Button variant="outline" size="sm" className="w-full">
+                  <h3 className="mb-2 font-heading font-bold text-slate-900">Manual</h3>
+                  <p className="mb-4 text-sm text-slate-500">PDF • 3.8 MB</p>
+                  <Button variant="outline" size="sm" className="w-full border-slate-200 hover:border-rodotec-blue hover:bg-slate-50">
                     <Download className="mr-2 h-4 w-4" />
                     Baixar
                   </Button>
@@ -555,41 +556,41 @@ const ProdutoDetalhe = () => {
       </section>
 
       {/* CTA */}
-      <section className="bg-navy py-16">
+      <section className="bg-gradient-to-br from-rodotec-blue to-accent py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-6 font-heading text-3xl font-bold text-white md:text-4xl">
+          <h2 className="mb-6 font-heading text-3xl font-bold text-white md:text-4xl tracking-tight">
             Interessado neste produto?
           </h2>
-          <p className="mb-8 text-xl text-white/80">
+          <p className="mb-8 text-xl text-white/90">
             Fale com um especialista ou encontre o distribuidor mais próximo
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link to="/contato">
-              <Button size="lg" className="btn-hero">
+              <Button size="lg" className="bg-white text-rodotec-blue hover:bg-slate-50 h-12 px-8 font-semibold shadow-lg">
                 Falar com Especialista
               </Button>
             </Link>
             <Link to="/distribuidores">
-              <button className="btn-hero-secondary">
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 h-12 px-8 font-semibold">
                 Ver Distribuidores
-              </button>
+              </Button>
             </Link>
           </div>
         </div>
       </section>
 
       {/* CTA Sticky Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-steel/20 bg-white/95 p-4 backdrop-blur-sm lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm lg:hidden shadow-lg">
         <div className="flex gap-2">
-          <Button 
-            className="btn-hero flex-1 gap-2"
+          <Button
+            className="bg-gradient-to-r from-rodotec-blue to-accent hover:shadow-lg flex-1 gap-2"
             onClick={() => window.open('https://wa.me/5511999999999?text=Olá! Gostaria de um orçamento.', '_blank')}
           >
             <MessageCircle className="h-5 w-5" />
             WhatsApp
           </Button>
           <Link to="/contato" className="flex-1">
-            <Button variant="outline" className="w-full gap-2 border-rodotec-blue text-rodotec-blue">
+            <Button variant="outline" className="w-full gap-2 border-slate-200 text-rodotec-blue hover:bg-slate-50">
               <Mail className="h-5 w-5" />
               Orçamento
             </Button>
